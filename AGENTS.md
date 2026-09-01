@@ -53,13 +53,13 @@ Design pillars: **Minimalism + Tactile Skeuomorphism**, "calm precision",
 
 | Concern          | Choice                                                   |
 |------------------|----------------------------------------------------------|
-| OS               | Windows 10/11 (x64), native                                |
-| Language         | C#, .NET 10 (LTS)                                         |
-| UI framework     | **WinUI 3 (Windows App SDK)**                             |
-| UI architecture  | MVVM                                                       |
+| OS               | Windows 10/11 (x64), native                              |
+| Language         | C#, .NET 10 (LTS)                                        |
+| UI framework     | **WinUI 3 (Windows App SDK)**                            |
+| UI architecture  | MVVM                                                     |
 | State/persistence| `SettingsStore` in `ChronosFlip.Core/Settings` (JSON under `%APPDATA%\ChronosFlip\settings.json`, atomic writes, corrupt-file recovery) |
 | Time zones       | `TimeZoneInfo` / IANA via Windows; keep app timezone-agnostic|
-| Build            | .NET solution in `src/` + `dotnet` CLI                     |
+| Build            | .NET solution in `src/` + `dotnet` CLI                   |
 
 Rationale: WinUI 3 chosen over MAUI for lighter resource usage, native window
 control (always-on-top, fullscreen), and smoother desktop experience with
@@ -125,6 +125,7 @@ Definition of done includes routing review/test/API work to subagents.
   files into the main context.
 
 Practical rules:
+
 - Batch reads; delegate exploration to subagents instead of loading files
   yourself when results are large.
 - Keep tool output tight (`tool_output.max_lines/bytes`); disable `lsp` if

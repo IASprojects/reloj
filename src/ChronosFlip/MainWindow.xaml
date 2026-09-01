@@ -1,0 +1,46 @@
+<Window
+    x:Class="ChronosFlip.MainWindow"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:controls="using:ChronosFlip.Controls">
+
+    <Grid x:Name="RootGrid"
+          Background="{StaticResource AppBackgroundBrush}">
+
+        <StackPanel Orientation="Horizontal"
+                    Spacing="{StaticResource StandardGap}"
+                    HorizontalAlignment="Center"
+                    VerticalAlignment="Center">
+
+            <controls:FlipCardControl Value="{Binding Hours}" Label="HOURS" />
+
+            <StackPanel Orientation="Vertical"
+                        Spacing="{StaticResource ColonDotGap}"
+                        HorizontalAlignment="Center"
+                        VerticalAlignment="Center">
+                <Ellipse Width="{StaticResource ColonDotSize}"
+                         Height="{StaticResource ColonDotSize}"
+                         Fill="{StaticResource ColonDotBrush}" />
+                <Ellipse Width="{StaticResource ColonDotSize}"
+                         Height="{StaticResource ColonDotSize}"
+                         Fill="{StaticResource ColonDotBrush}" />
+            </StackPanel>
+
+            <controls:FlipCardControl Value="{Binding Minutes}" Label="MINUTES" />
+
+            <StackPanel Orientation="Vertical"
+                        Spacing="{StaticResource ColonDotGap}"
+                        HorizontalAlignment="Center"
+                        VerticalAlignment="Center">
+                <Ellipse Width="{StaticResource ColonDotSize}"
+                         Height="{StaticResource ColonDotSize}"
+                         Fill="{StaticResource ColonDotBrush}" />
+                <Ellipse Width="{StaticResource ColonDotSize}"
+                         Height="{StaticResource ColonDotSize}"
+                         Fill="{StaticResource ColonDotBrush}" />
+            </StackPanel>
+
+            <controls:FlipCardControl Value="{Binding Seconds}" Label="SECONDS" />
+        </StackPanel>
+    </Grid>
+</Window>

@@ -1,0 +1,334 @@
+<!DOCTYPE html><html class="dark" lang="en" style=""><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>Chronos Flip - Clock</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400;1,700&amp;family=JetBrains+Mono:wght@400;600;700&amp;family=Geist:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "surface-dim": "#121414",
+                      "on-tertiary-fixed": "#1b1c1c",
+                      "tertiary": "#c8c6c5",
+                      "on-secondary": "#2f3131",
+                      "on-surface": "#e3e2e2",
+                      "surface-container-high": "#292a2a",
+                      "on-primary-fixed": "#1c1b1b",
+                      "surface-container-highest": "#343535",
+                      "on-tertiary": "#303030",
+                      "on-error-container": "#ffdad6",
+                      "on-background": "#e3e2e2",
+                      "on-secondary-container": "#b4b5b5",
+                      "primary-container": "#121212",
+                      "secondary-container": "#454747",
+                      "tertiary-fixed": "#e4e2e1",
+                      "secondary-fixed": "#e2e2e2",
+                      "inverse-primary": "#5f5e5e",
+                      "error-container": "#93000a",
+                      "on-primary": "#313030",
+                      "primary-fixed": "#e5e2e1",
+                      "on-primary-fixed-variant": "#474646",
+                      "surface-container-lowest": "#0d0e0f",
+                      "tertiary-container": "#121212",
+                      "secondary-fixed-dim": "#c6c6c7",
+                      "inverse-surface": "#e3e2e2",
+                      "background": "#121414",
+                      "on-secondary-fixed-variant": "#454747",
+                      "error": "#ffb4ab",
+                      "on-tertiary-container": "#7e7d7d",
+                      "surface-tint": "#c8c6c5",
+                      "on-secondary-fixed": "#1a1c1c",
+                      "on-tertiary-fixed-variant": "#474746",
+                      "surface-container-low": "#1b1c1c",
+                      "inverse-on-surface": "#303031",
+                      "outline-variant": "#444748",
+                      "surface-variant": "#343535",
+                      "on-error": "#690005",
+                      "on-primary-container": "#7e7d7d",
+                      "secondary": "#c6c6c7",
+                      "surface-container": "#1f2020",
+                      "primary-fixed-dim": "#c8c6c5",
+                      "surface": "#121414",
+                      "on-surface-variant": "#c4c7c7",
+                      "surface-bright": "#383939",
+                      "outline": "#8e9192",
+                      "primary": "#c8c6c5",
+                      "tertiary-fixed-dim": "#c8c6c5",
+                      "neon-blue": "#00f0ff"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.125rem",
+                      "lg": "0.25rem",
+                      "xl": "0.5rem",
+                      "full": "0.75rem"
+              },
+              "spacing": {
+                      "unit": "4px",
+                      "card-padding": "1.5rem",
+                      "stack-gap": "0.5rem",
+                      "gutter": "1rem",
+                      "app-margin": "2rem"
+              },
+              "fontFamily": {
+                      "headline-lg-mobile": [
+                              "Space Mono"
+                      ],
+                      "label-caps": [
+                              "JetBrains Mono"
+                      ],
+                      "headline-lg": [
+                              "Space Mono"
+                      ],
+                      "body-md": [
+                              "Geist"
+                      ],
+                      "display-clock": [
+                              "Space Mono"
+                      ]
+              },
+              "fontSize": {
+                      "headline-lg-mobile": [
+                              "24px",
+                              {
+                                      "lineHeight": "32px",
+                                      "fontWeight": "700"
+                              }
+                      ],
+                      "label-caps": [
+                              "11px",
+                              {
+                                      "lineHeight": "16px",
+                                      "letterSpacing": "0.1em",
+                                      "fontWeight": "600"
+                              }
+                      ],
+                      "headline-lg": [
+                              "32px",
+                              {
+                                      "lineHeight": "40px",
+                                      "fontWeight": "700"
+                              }
+                      ],
+                      "body-md": [
+                              "14px",
+                              {
+                                      "lineHeight": "20px",
+                                      "fontWeight": "400"
+                              }
+                      ],
+                      "display-clock": [
+                              "120px",
+                              {
+                                      "lineHeight": "1",
+                                      "letterSpacing": "-0.05em",
+                                      "fontWeight": "700"
+                              }
+                      ]
+              }
+            }
+          }
+        }
+    </script>
+<style>
+        body {
+            background-color: transparent;
+        }
+        
+        /* Neon Glow Effect */
+        .neon-glow-container {
+            border: 1.5px solid var(--tw-colors-neon-blue, #00f0ff);
+            box-shadow: 0 0 15px rgba(0, 240, 255, 0.15), inset 0 0 15px rgba(0, 240, 255, 0.05);
+            transition: all 0.3s ease;
+        }
+        
+        .neon-glow-container.neon-off {
+            border-color: #3A3A3A;
+            box-shadow: none;
+        }
+
+        /* Flip Clock Specifics */
+        .flip-card {
+            background-color: #1a1c1c;
+            border: 1px solid #3A3A3A;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .flip-bisect {
+            position: absolute;
+            top: 50%;
+            left: 0;
+            width: 100%;
+            height: 1px;
+            background-color: #121212;
+            z-index: 10;
+        }
+        
+        .flip-card-inner {
+            background: linear-gradient(to bottom, #292a2a 0%, #1b1c1c 100%);
+        }
+
+        /* Custom Toggle */
+        .neon-toggle:checked {
+            background-color: var(--tw-colors-neon-blue, #00f0ff);
+            border-color: var(--tw-colors-neon-blue, #00f0ff);
+        }
+        
+        .ghost-button {
+            border: 1px solid #444748;
+            transition: all 0.2s;
+        }
+        .ghost-button:hover {
+            border-color: #00f0ff;
+            color: #00f0ff;
+            box-shadow: 0 0 8px rgba(0, 240, 255, 0.2);
+        }
+    </style>
+</head>
+<body class="bg-background min-h-screen flex items-center justify-center p-app-margin font-body-md text-on-surface">
+<!-- Main Widget Container -->
+<div class="relative w-full max-w-[800px] h-[500px] bg-[#2A2A2A] rounded-xl flex neon-glow-container overflow-hidden" id="main-widget">
+<!-- SideNavBar (Desktop Web) -->
+<nav class="hidden md:flex flex-col py-gutter px-3 gap-stack-gap bg-surface-container-low dark:bg-surface-container-low border-r border-outline-variant docked left-0 h-full w-48">
+<!-- Brand Avatar / Mini -->
+
+<!-- Nav Links -->
+<button class="w-full h-12 flex items-center justify-start px-4 gap-3 text-primary bg-secondary-container rounded-lg Active: scale-95 duration-100" title="Clock">
+<span class="material-symbols-outlined" data-weight="fill" style="font-variation-settings: &quot;FILL&quot; 1;">schedule</span>
+<span class="font-label-caps text-label-caps tracking-widest">CLOCK</span>
+</button>
+<button class="w-full h-12 flex items-center justify-start px-4 gap-3 text-on-surface-variant hover:bg-surface-container-high transition-all rounded-lg" title="Timer">
+<span class="material-symbols-outlined">timer</span>
+<span class="font-label-caps text-label-caps tracking-widest">TIMER</span>
+</button>
+<button class="w-full h-12 flex items-center justify-start px-4 gap-3 text-on-surface-variant hover:bg-surface-container-high transition-all rounded-lg" title="Alarm">
+<span class="material-symbols-outlined">alarm</span>
+<span class="font-label-caps text-label-caps tracking-widest">ALARM</span>
+</button>
+<!-- Spacer -->
+<div class="flex-grow"></div>
+<!-- Neon Toggle Contextual Placement -->
+<div class="mb-4 flex flex-col items-center gap-2">
+<span class="font-label-caps text-label-caps text-on-surface-variant">NEON</span>
+<label class="relative inline-flex items-center cursor-pointer">
+<input checked="" class="sr-only peer" id="neonToggle" type="checkbox">
+<div class="w-9 h-5 bg-surface-variant peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-[#00f0ff] peer-checked:shadow-[0_0_10px_rgba(0,240,255,0.5)]"></div>
+</label>
+</div>
+</nav>
+<!-- Main Content Area -->
+<main class="flex-1 flex flex-col relative bg-surface-dim overflow-hidden">
+<!-- Vertical Faded Branding -->
+<div class="absolute right-8 top-1/2 -translate-y-1/2 pointer-events-none opacity-5 z-0 select-none" style="writing-mode: vertical-rl;">
+<span class="font-display-clock text-9xl text-primary tracking-tighter uppercase">Chronos_Flip</span>
+</div>
+<!-- Window Controls / Top Bar -->
+<header class="flex justify-between items-center px-gutter py-unit w-full h-12 absolute top-0 left-0 z-20">
+<div class="font-headline-lg-mobile text-headline-lg-mobile text-primary tracking-tight">Main Clock</div>
+<div class="flex gap-2 mr-2"><button class="text-on-surface-variant hover:text-primary transition-colors" title="Fullscreen">
+<span class="material-symbols-outlined text-[16px]">fullscreen</span>
+</button>
+<button class="text-on-surface-variant hover:text-primary transition-colors">
+<span class="material-symbols-outlined text-[16px]">push_pin</span>
+</button>
+<button class="text-on-surface-variant hover:text-primary transition-colors">
+<span class="material-symbols-outlined text-[16px]">settings</span>
+</button>
+<button class="text-on-surface-variant hover:text-error transition-colors">
+<span class="material-symbols-outlined text-[16px]">close</span>
+</button>
+</div>
+</header>
+<!-- Clock Canvas -->
+<div class="flex-1 flex flex-col items-center justify-center p-card-padding z-10 relative">
+<!-- Status Chip -->
+<div class="mb-8 flex items-center gap-2 px-3 py-1 bg-surface-container-lowest rounded-full border border-outline-variant whitespace-nowrap">
+<div class="w-2 h-2 rounded-full bg-[#00f0ff] shadow-[0_0_5px_rgba(0,240,255,0.8)]" id="status-dot"></div>
+<span class="font-label-caps text-label-caps text-on-surface">SYNCED : UTC+1</span>
+</div>
+<!-- Flip Clock Container -->
+<div class="flex gap-4 items-center">
+<!-- Hours -->
+<div class="flex flex-col gap-1 items-center">
+<div class="flip-card rounded-lg w-[140px] h-[180px] flex items-center justify-center shadow-lg">
+<div class="flip-bisect"></div>
+<div class="flip-card-inner absolute inset-0 flex items-center justify-center">
+<span class="font-display-clock text-display-clock text-primary z-20" id="hours">10</span>
+</div>
+</div>
+<span class="font-label-caps text-label-caps text-on-surface-variant mt-2">HOURS</span>
+</div>
+<!-- Separator -->
+<div class="flex flex-col gap-4 pb-8">
+<div class="w-3 h-3 rounded-full bg-outline-variant"></div>
+<div class="w-3 h-3 rounded-full bg-outline-variant"></div>
+</div>
+<!-- Minutes -->
+<div class="flex flex-col gap-1 items-center">
+<div class="flip-card rounded-lg w-[140px] h-[180px] flex items-center justify-center shadow-lg">
+<div class="flip-bisect"></div>
+<div class="flip-card-inner absolute inset-0 flex items-center justify-center">
+<span class="font-display-clock text-display-clock text-primary z-20" id="minutes">52</span>
+</div>
+</div>
+<span class="font-label-caps text-label-caps text-on-surface-variant mt-2">MINUTES</span>
+</div>
+<!-- Separator -->
+<div class="flex flex-col gap-4 pb-8">
+<div class="w-3 h-3 rounded-full bg-outline-variant"></div>
+<div class="w-3 h-3 rounded-full bg-outline-variant"></div>
+</div>
+<!-- Seconds -->
+<div class="flex flex-col gap-1 items-center">
+<div class="flip-card rounded-lg w-[140px] h-[180px] flex items-center justify-center shadow-lg">
+<div class="flip-bisect"></div>
+<div class="flip-card-inner absolute inset-0 flex items-center justify-center">
+<span class="font-display-clock text-display-clock text-primary z-20" id="seconds">22</span>
+</div>
+</div>
+<span class="font-label-caps text-label-caps text-on-surface-variant mt-2">SECONDS</span>
+</div>
+</div>
+</div>
+</main>
+</div>
+<script>
+        // Simple Clock Logic
+        function updateClock() {
+            const now = new Date();
+            const h = String(now.getHours()).padStart(2, '0');
+            const m = String(now.getMinutes()).padStart(2, '0');
+            const s = String(now.getSeconds()).padStart(2, '0');
+
+            document.getElementById('hours').textContent = h;
+            document.getElementById('minutes').textContent = m;
+            document.getElementById('seconds').textContent = s;
+        }
+
+        setInterval(updateClock, 1000);
+        updateClock();
+
+        // Neon Toggle Logic
+        const toggle = document.getElementById('neonToggle');
+        const widget = document.getElementById('main-widget');
+        const statusDot = document.getElementById('status-dot');
+
+        toggle.addEventListener('change', (e) => {
+            if (e.target.checked) {
+                widget.classList.remove('neon-off');
+                statusDot.classList.remove('bg-outline-variant', 'shadow-none');
+                statusDot.classList.add('bg-[#00f0ff]', 'shadow-[0_0_5px_rgba(0,240,255,0.8)]');
+            } else {
+                widget.classList.add('neon-off');
+                statusDot.classList.remove('bg-[#00f0ff]', 'shadow-[0_0_5px_rgba(0,240,255,0.8)]');
+                statusDot.classList.add('bg-outline-variant', 'shadow-none');
+            }
+        });
+    </script>
+
+
+</body></html>

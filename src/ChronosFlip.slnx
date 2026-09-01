@@ -1,0 +1,5 @@
+<Solution>
+  <Project Path="ChronosFlip.Core/ChronosFlip.Core.csproj" />
+  <Project Path="ChronosFlip.Tests/ChronosFlip.Tests.csproj" />
+  <Project Path="ChronosFlip/ChronosFlip.csproj" />
+</Solution>

@@ -1,0 +1,16 @@
+## .NET build output
+bin/
+obj/
+*.user
+
+## Rider / VS
+.vs/
+.idea/
+
+## Windows App SDK
+*.pri
+
+## opencode
+.opencode/node_modules/
+.opencode/package-lock.json
+.opencode/package.json

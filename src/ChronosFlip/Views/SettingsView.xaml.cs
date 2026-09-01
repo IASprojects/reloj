@@ -32,6 +32,11 @@ public sealed partial class SettingsView : UserControl
         }
     }
 
+    public void CancelPendingSave()
+    {
+        _debounce.Cancel();
+    }
+
     private void OnViewModelPropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
     {
         if (ViewModel is null)

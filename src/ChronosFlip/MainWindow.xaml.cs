@@ -51,22 +51,26 @@ public sealed partial class MainWindow : Window
 
     private void OnClosed(object sender, WindowEventArgs args)
     {
+        SettingsPanel.CancelPendingSave();
         SaveWindowBounds();
         _clock.Dispose();
     }
 
     private void ApplyNeonAccent(string hex)
     {
+        if (!ChronosFlip.Converters.HexToColorConverter.TryParse(hex, out var color))
+        {
+            return;
+        }
+
+        NeonShell.AccentColor = color;
+
         if (Application.Current?.Resources is null)
         {
             return;
         }
-        if (!Application.Current.Resources.TryGetValue("NeonAccentBrush", out var resource) ||
-            resource is not SolidColorBrush brush)
-        {
-            return;
-        }
-        if (ChronosFlip.Converters.HexToColorConverter.TryParse(hex, out var color))
+        if (Application.Current.Resources.TryGetValue("NeonAccentBrush", out var resource) &&
+            resource is Microsoft.UI.Xaml.Media.SolidColorBrush brush)
         {
             brush.Color = color;
         }

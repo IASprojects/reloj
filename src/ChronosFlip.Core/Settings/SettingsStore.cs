@@ -50,7 +50,7 @@ public sealed class SettingsStore
             var loaded = JsonSerializer.Deserialize<ChronosFlipSettings>(stream, s_jsonOptions);
             return Sanitize(loaded ?? new ChronosFlipSettings());
         }
-        catch (Exception ex) when (ex is JsonException or InvalidOperationException)
+        catch (Exception ex) when (ex is JsonException or InvalidOperationException or IOException or UnauthorizedAccessException)
         {
             QuarantineCorruptFile();
             return new ChronosFlipSettings();

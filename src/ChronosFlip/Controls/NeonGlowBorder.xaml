@@ -1,0 +1,21 @@
+<UserControl
+    x:Class="ChronosFlip.Controls.NeonGlowBorder"
+    x:Name="Root"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <Grid>
+        <Border x:Name="GlowBorder"
+                BorderBrush="{StaticResource NeonAccentBrush}"
+                BorderThickness="{StaticResource NeonGlowThickness}"
+                CornerRadius="{StaticResource CardCornerRadius}"
+                Opacity="{StaticResource NeonGlowOpacity}"
+                IsHitTestVisible="False" />
+        <Border x:Name="StrokeBorder"
+                BorderBrush="{StaticResource NeonAccentBrush}"
+                BorderThickness="{StaticResource NeonStrokeThickness}"
+                CornerRadius="{StaticResource CardCornerRadius}"
+                IsHitTestVisible="False" />
+        <ContentPresenter Content="{x:Bind InnerContent, Mode=OneWay}" />
+    </Grid>
+</UserControl>

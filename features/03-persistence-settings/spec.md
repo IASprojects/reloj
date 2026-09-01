@@ -1,6 +1,6 @@
 # Persistence & Settings
 
-- **Status:** `Planned`
+- **Status:** `Done`
 - **Requirements:** FR-70, FR-71, FR-72, FR-61, FR-62, FR-63
 - **Depends on:** 02 (app shell must exist to host settings)
 - **Stage:** 2

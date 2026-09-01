@@ -57,7 +57,7 @@ Design pillars: **Minimalism + Tactile Skeuomorphism**, "calm precision",
 | Language         | C#, .NET 10 (LTS)                                         |
 | UI framework     | **WinUI 3 (Windows App SDK)**                             |
 | UI architecture  | MVVM                                                       |
-| State/persistence| JSON settings under `%APPDATA%` (or future SettingsStore)  |
+| State/persistence| `SettingsStore` in `ChronosFlip.Core/Settings` (JSON under `%APPDATA%\ChronosFlip\settings.json`, atomic writes, corrupt-file recovery) |
 | Time zones       | `TimeZoneInfo` / IANA via Windows; keep app timezone-agnostic|
 | Build            | .NET solution in `src/` + `dotnet` CLI                     |
 

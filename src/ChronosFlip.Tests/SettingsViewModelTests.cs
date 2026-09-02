@@ -66,6 +66,25 @@ public sealed class SettingsViewModelTests : IDisposable
     }
 
     [Fact]
+    public void Save_PreservesWindowBounds_OwnedByWindow()
+    {
+        var store = new SettingsStore(_directory);
+        store.Save(new ChronosFlipSettings
+        {
+            Window = new WindowBounds { X = 10, Y = 20, Width = 700, Height = 360 },
+        });
+        var vm = new SettingsViewModel(store);
+        vm.Load();
+
+        vm.Save();
+        var reloaded = store.Load();
+
+        Assert.NotNull(reloaded.Window);
+        Assert.Equal(700, reloaded.Window!.Width);
+        Assert.Equal(360, reloaded.Window.Height);
+    }
+
+    [Fact]
     public void Setting_NeonEnabled_RaisesPropertyChanged()
     {
         var store = new SettingsStore(_directory);
@@ -135,11 +154,11 @@ public sealed class SettingsViewModelTests : IDisposable
 
         vm.Apply(new ChronosFlipSettings
         {
-            Zones = new List<ClockZoneRef?>
+            Zones = new List<ClockZoneRef>
             {
-                null,
+                null!,
                 new() { Label = "Madrid", TimeZoneId = "Romance Standard Time" },
-                new() { Label = null, TimeZoneId = null },
+                new() { Label = null!, TimeZoneId = null! },
             },
         });
 

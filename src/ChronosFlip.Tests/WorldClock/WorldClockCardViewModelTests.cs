@@ -63,4 +63,22 @@ public sealed class WorldClockCardViewModelTests
         Assert.Contains(nameof(WorldClockCardViewModel.Seconds), changed);
         Assert.Contains(nameof(WorldClockCardViewModel.OffsetText), changed);
     }
+
+    [Fact]
+    public void Time_FormatsHoursAndMinutes()
+    {
+        var card = new WorldClockCardViewModel("Test", "SpringFallTest", SpringFallZone);
+
+        card.SetPresent(new DateTimeOffset(2026, 7, 15, 0, 0, 0, TimeSpan.Zero));
+
+        Assert.Equal("02:00", card.Time);
+    }
+
+    [Fact]
+    public void IsRemovable_DefaultsTrue()
+    {
+        var card = new WorldClockCardViewModel("Test", "SpringFallTest", SpringFallZone);
+
+        Assert.True(card.IsRemovable);
+    }
 }

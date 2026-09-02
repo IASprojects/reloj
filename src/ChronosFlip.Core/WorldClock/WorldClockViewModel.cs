@@ -24,7 +24,10 @@ public partial class WorldClockViewModel : ObservableObject
             ?? throw new ArgumentException("Resolver must expose a valid local zone.", nameof(resolver));
 
         _localCard = new WorldClockCardViewModel(
-            ClockZoneFactory.DefaultLabel(localZone), localZone.Id, localZone);
+            ClockZoneFactory.DefaultLabel(localZone), localZone.Id, localZone)
+        {
+            IsRemovable = false,
+        };
         Cards.Add(_localCard);
 
         foreach (var zone in zones)

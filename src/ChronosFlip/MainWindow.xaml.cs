@@ -1,7 +1,9 @@
+using System.Collections.Specialized;
 using System.Runtime.InteropServices;
 using ChronosFlip.Core.Clocks;
 using ChronosFlip.Core.Settings;
 using ChronosFlip.Core.ViewModels;
+using ChronosFlip.Core.WorldClock;
 using ChronosFlip.Services;
 using Microsoft.UI;
 using Microsoft.UI.Xaml;
@@ -15,6 +17,7 @@ public sealed partial class MainWindow : Window
 {
     private readonly ClockService _clock;
     private readonly SettingsStore _settingsStore;
+    private readonly ZonePickerViewModel _zonePicker;
     private readonly IntPtr _hwnd;
 
     public MainWindow()
@@ -30,15 +33,24 @@ public sealed partial class MainWindow : Window
         ViewModel.PropertyChanged += (_, _) => ApplyNeonAccent(ViewModel.NeonHexColor);
 
         var ticker = new ClockTicker(new SystemClock());
-        var clockViewModel = new MainClockViewModel();
-        clockViewModel.Attach(ticker);
+
+        WorldClock = new WorldClockViewModel(new SystemZoneResolver(), ViewModel.Zones);
+        WorldClock.Cards.CollectionChanged += OnCardsChanged;
+        WorldClock.Attach(ticker);
+
+        _zonePicker = new ZonePickerViewModel(new ClockZoneFactory(new SystemZoneResolver()));
+        _zonePicker.Reset(WorldClock.Cards.Select(card => card.TimeZoneId));
 
         _clock = new ClockService(DispatcherQueue, ticker);
 
-        RootGrid.DataContext = clockViewModel;
+        RootGrid.DataContext = WorldClock;
         _clock.Start();
 
         SettingsPanel.ViewModel = ViewModel;
+        ZonePicker.ViewModel = _zonePicker;
+        ZonePicker.SetTray(WorldClock.Cards);
+        ZonePicker.AddRequested += OnZoneAddRequested;
+        ZonePicker.RemoveRequested += OnZoneRemoveRequested;
 
         Title = "Chronos Flip";
         RestoreWindowBounds(loaded);
@@ -49,11 +61,30 @@ public sealed partial class MainWindow : Window
 
     public SettingsViewModel ViewModel { get; }
 
+    public WorldClockViewModel WorldClock { get; }
+
     private void OnClosed(object sender, WindowEventArgs args)
     {
         SettingsPanel.CancelPendingSave();
         SaveWindowBounds();
         _clock.Dispose();
+    }
+
+    private void OnZoneAddRequested(object? sender, ClockZone zone)
+    {
+        WorldClock.AddZone(zone);
+    }
+
+    private void OnZoneRemoveRequested(object? sender, string zoneId)
+    {
+        WorldClock.RemoveZone(zoneId);
+    }
+
+    private void OnCardsChanged(object? sender, NotifyCollectionChangedEventArgs e)
+    {
+        _zonePicker.Reset(WorldClock.Cards.Select(card => card.TimeZoneId));
+        ViewModel.SetZones(WorldClock.ZonesToPersist());
+        ViewModel.Save();
     }
 
     private void ApplyNeonAccent(string hex)
@@ -114,6 +145,7 @@ public sealed partial class MainWindow : Window
                 NeonEnabled = ViewModel.NeonEnabled,
                 NeonHexColor = ViewModel.NeonHexColor,
                 PinToTop = ViewModel.PinToTop,
+                Zones = ViewModel.Zones.Select(ClockZoneRef.FromClockZone).ToList(),
                 Window = new WindowBounds
                 {
                     X = rect.left,

@@ -26,6 +26,11 @@
     <x:Double x:Key="ColonDotGap">16</x:Double>
     <x:Double x:Key="ColonDotSize">12</x:Double>
 
+    <!-- World-clock compact tray cards -->
+    <x:Double x:Key="WorldClockCardWidth">132</x:Double>
+    <x:Double x:Key="WorldClockCardHeight">96</x:Double>
+    <Thickness x:Key="WorldClockCardGap">6</Thickness>
+
     <!-- Typography -->
     <FontFamily x:Key="SpaceMonoFont">ms-appx:///Assets/Fonts/SpaceMono-Bold.ttf#Space Mono</FontFamily>
     <FontFamily x:Key="JetBrainsMonoFont">ms-appx:///Assets/Fonts/JetBrainsMono-SemiBold.ttf#JetBrains Mono</FontFamily>

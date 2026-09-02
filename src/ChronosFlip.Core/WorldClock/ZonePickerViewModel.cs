@@ -57,4 +57,23 @@ public partial class ZonePickerViewModel : ObservableObject
 
         OnPropertyChanged(nameof(Zones));
     }
+
+    /// <summary>
+    /// Replaces the excluded set with the given tray ids. Call after any
+    /// tray add/remove so already-shown zones disappear from the add list.
+    /// </summary>
+    public void Reset(IEnumerable<string> trayIds)
+    {
+        ArgumentNullException.ThrowIfNull(trayIds);
+        _excludedIds.Clear();
+        foreach (var id in trayIds)
+        {
+            if (!string.IsNullOrWhiteSpace(id))
+            {
+                _excludedIds.Add(id);
+            }
+        }
+
+        OnPropertyChanged(nameof(Zones));
+    }
 }

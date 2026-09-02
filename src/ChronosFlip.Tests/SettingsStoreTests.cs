@@ -181,10 +181,10 @@ public sealed class SettingsStoreTests : IDisposable
         var loaded = store.Load();
 
         Assert.NotNull(loaded.Zones);
-        Assert.Single(loaded.Zones.Where(z => z.TimeZoneId == "Tokyo Standard Time"));
-        Assert.Equal("A", loaded.Zones.Single(z => z.TimeZoneId == "Tokyo Standard Time").Label);
-        Assert.DoesNotContain(loaded.Zones, z => string.IsNullOrWhiteSpace(z.Label));
-        Assert.DoesNotContain(loaded.Zones, z => string.IsNullOrWhiteSpace(z.TimeZoneId));
+        Assert.Single(loaded.Zones!, z => z.TimeZoneId == "Tokyo Standard Time");
+        Assert.Equal("A", loaded.Zones!.Single(z => z.TimeZoneId == "Tokyo Standard Time").Label);
+        Assert.DoesNotContain(loaded.Zones!, z => string.IsNullOrWhiteSpace(z.Label));
+        Assert.DoesNotContain(loaded.Zones!, z => string.IsNullOrWhiteSpace(z.TimeZoneId));
     }
 
     [Fact]

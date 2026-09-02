@@ -45,6 +45,7 @@ public partial class SettingsViewModel : ObservableObject
             NeonHexColor = NeonHexColor,
             PinToTop = PinToTop,
             Zones = Zones.Select(ClockZoneRef.FromClockZone).ToList(),
+            Window = _store.Load().Window,
         };
         _store.Save(settings);
     }

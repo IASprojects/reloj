@@ -77,4 +77,28 @@ public sealed class ZonePickerViewModelTests
 
         Assert.Equal(2, changed.Count(name => name == nameof(ZonePickerViewModel.Zones)));
     }
+
+    [Fact]
+    public void Reset_ReplacesExcludedIds()
+    {
+        var picker = CreatePicker();
+        picker.Reset(new[] { "SpringFallTest", "FixedFive" });
+
+        picker.Reset(new[] { "SpringFallTest" });
+
+        Assert.DoesNotContain(picker.Zones, z => z.TimeZoneId == "SpringFallTest");
+        Assert.Contains(picker.Zones, z => z.TimeZoneId == "FixedFive");
+    }
+
+    [Fact]
+    public void Reset_Empty_UnhidesAllZones()
+    {
+        var picker = CreatePicker();
+        picker.Reset(new[] { "SpringFallTest" });
+
+        picker.Reset([]);
+
+        Assert.Contains(picker.Zones, z => z.TimeZoneId == "SpringFallTest");
+        Assert.Contains(picker.Zones, z => z.TimeZoneId == "FixedFive");
+    }
 }

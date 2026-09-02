@@ -23,6 +23,7 @@ public sealed class WorldClockViewModelTests
         Assert.NotEmpty(viewModel.Cards);
         Assert.Equal("SpringFallTest", viewModel.Cards[0].TimeZoneId);
         Assert.Same(viewModel.LocalCard, viewModel.Cards[0]);
+        Assert.False(viewModel.Cards[0].IsRemovable);
     }
 
     [Fact]
@@ -89,6 +90,7 @@ public sealed class WorldClockViewModelTests
         Assert.Equal(2, viewModel.Cards.Count);
         Assert.Equal("My Label", viewModel.Cards[1].Label);
         Assert.Equal("FixedFive", viewModel.Cards[1].TimeZoneId);
+        Assert.True(viewModel.Cards[1].IsRemovable);
     }
 
     [Fact]

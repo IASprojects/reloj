@@ -18,6 +18,7 @@ public partial class WorldClockCardViewModel : ObservableObject
     [NotifyPropertyChangedFor(nameof(Minutes))]
     [NotifyPropertyChangedFor(nameof(Seconds))]
     [NotifyPropertyChangedFor(nameof(OffsetText))]
+    [NotifyPropertyChangedFor(nameof(Time))]
     private DateTimeOffset _now = DateTimeOffset.MinValue;
 
     public WorldClockCardViewModel(string label, string timeZoneId, TimeZoneInfo zone)
@@ -39,6 +40,12 @@ public partial class WorldClockCardViewModel : ObservableObject
 
     /// <summary>Zone wall-clock seconds, zero-padded.</summary>
     public string Seconds => TimeSegments.Of(Now).Seconds;
+
+    /// <summary>Zone wall-clock "HH:MM" for compact tray cards.</summary>
+    public string Time => $"{Hours}:{Minutes}";
+
+    /// <summary>True when the card may be removed from the tray (the local card cannot).</summary>
+    public bool IsRemovable { get; set; } = true;
 
     /// <summary>Live UTC offset label for the current instant (e.g. "UTC+05:30").</summary>
     public string OffsetText => FormatOffset(Now.Offset);

@@ -1,4 +1,5 @@
 using ChronosFlip.Core.Settings;
+using ChronosFlip.Core.WorldClock;
 
 namespace ChronosFlip.Tests;
 
@@ -31,6 +32,8 @@ public sealed class SettingsStoreTests : IDisposable
         Assert.Equal(SettingsDefaults.NeonHexColor, loaded.NeonHexColor);
         Assert.False(loaded.PinToTop);
         Assert.Null(loaded.Window);
+        Assert.NotNull(loaded.Zones);
+        Assert.Empty(loaded.Zones);
     }
 
     [Fact]
@@ -120,5 +123,88 @@ public sealed class SettingsStoreTests : IDisposable
 
         Assert.True(loaded.NeonEnabled);
         Assert.Equal("#123456", loaded.NeonHexColor);
+    }
+
+    [Fact]
+    public void Save_Then_Load_RoundTripsZones()
+    {
+        var store = new SettingsStore(_directory);
+        var input = new ChronosFlipSettings
+        {
+            Zones = new List<ClockZoneRef>
+            {
+                new() { Label = "Paris", TimeZoneId = "Romance Standard Time" },
+                new() { Label = "Tokyo", TimeZoneId = "Tokyo Standard Time" },
+            },
+        };
+
+        store.Save(input);
+        var loaded = store.Load();
+
+        Assert.NotNull(loaded.Zones);
+        Assert.Equal(2, loaded.Zones.Count);
+        Assert.Equal("Paris", loaded.Zones[0].Label);
+        Assert.Equal("Romance Standard Time", loaded.Zones[0].TimeZoneId);
+        Assert.Equal("Tokyo", loaded.Zones[1].Label);
+        Assert.Equal("Tokyo Standard Time", loaded.Zones[1].TimeZoneId);
+    }
+
+    [Fact]
+    public void Load_NormalizesMissingZones_ToEmptyList()
+    {
+        var store = new SettingsStore(_directory);
+        Directory.CreateDirectory(_directory);
+        File.WriteAllText(store.FilePath, "{\"NeonEnabled\":true}");
+
+        var loaded = store.Load();
+
+        Assert.NotNull(loaded.Zones);
+        Assert.Empty(loaded.Zones);
+    }
+
+    [Fact]
+    public void Load_DeduplicatesZones_ByTimeZoneId()
+    {
+        var store = new SettingsStore(_directory);
+        Directory.CreateDirectory(_directory);
+        File.WriteAllText(store.FilePath, """
+        {
+          "Zones": [
+            { "Label": "A", "TimeZoneId": "Tokyo Standard Time" },
+            { "Label": "B", "TimeZoneId": "Tokyo Standard Time" },
+            { "Label": "", "TimeZoneId": "Romance Standard Time" },
+            { "Label": "No ID", "TimeZoneId": "  " }
+          ]
+        }
+        """);
+
+        var loaded = store.Load();
+
+        Assert.NotNull(loaded.Zones);
+        Assert.Single(loaded.Zones.Where(z => z.TimeZoneId == "Tokyo Standard Time"));
+        Assert.Equal("A", loaded.Zones.Single(z => z.TimeZoneId == "Tokyo Standard Time").Label);
+        Assert.DoesNotContain(loaded.Zones, z => string.IsNullOrWhiteSpace(z.Label));
+        Assert.DoesNotContain(loaded.Zones, z => string.IsNullOrWhiteSpace(z.TimeZoneId));
+    }
+
+    [Fact]
+    public void Load_DeduplicatesZones_CaseInsensitive()
+    {
+        var store = new SettingsStore(_directory);
+        Directory.CreateDirectory(_directory);
+        File.WriteAllText(store.FilePath, """
+        {
+          "Zones": [
+            { "Label": "A", "TimeZoneId": "tokyo standard time" },
+            { "Label": "B", "TimeZoneId": "Tokyo Standard Time" }
+          ]
+        }
+        """);
+
+        var loaded = store.Load();
+
+        Assert.NotNull(loaded.Zones);
+        Assert.Single(loaded.Zones);
+        Assert.Equal("A", loaded.Zones[0].Label);
     }
 }

@@ -1,4 +1,5 @@
 using ChronosFlip.Core.Settings;
+using ChronosFlip.Core.WorldClock;
 using CommunityToolkit.Mvvm.ComponentModel;
 
 namespace ChronosFlip.Core.ViewModels;
@@ -21,6 +22,9 @@ public partial class SettingsViewModel : ObservableObject
     [ObservableProperty]
     private bool _pinToTop;
 
+    /// <summary>Current world-clock tray zones in order (persisted on save).</summary>
+    public IReadOnlyList<ClockZone> Zones { get; private set; } = [];
+
     public SettingsViewModel(SettingsStore store)
     {
         _store = store ?? throw new ArgumentNullException(nameof(store));
@@ -40,6 +44,7 @@ public partial class SettingsViewModel : ObservableObject
             NeonEnabled = NeonEnabled,
             NeonHexColor = NeonHexColor,
             PinToTop = PinToTop,
+            Zones = Zones.Select(ClockZoneRef.FromClockZone).ToList(),
         };
         _store.Save(settings);
     }
@@ -52,5 +57,20 @@ public partial class SettingsViewModel : ObservableObject
             ? SettingsDefaults.NeonHexColor
             : settings.NeonHexColor;
         PinToTop = settings.PinToTop;
+        Zones = settings.Zones?
+            .Where(zone => zone is not null)
+            .Select(zone => zone!.ToClockZone())
+            .Where(zone => zone is not null)
+            .Cast<ClockZone>()
+            .ToList() ?? [];
+        OnPropertyChanged(nameof(Zones));
+    }
+
+    /// <summary>Installs the current world-clock tray zones (persisted on next save).</summary>
+    public void SetZones(IEnumerable<ClockZone> zones)
+    {
+        ArgumentNullException.ThrowIfNull(zones);
+        Zones = zones.ToList();
+        OnPropertyChanged(nameof(Zones));
     }
 }

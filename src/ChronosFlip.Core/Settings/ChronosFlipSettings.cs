@@ -1,3 +1,5 @@
+using ChronosFlip.Core.WorldClock;
+
 namespace ChronosFlip.Core.Settings;
 
 public sealed class ChronosFlipSettings
@@ -11,6 +13,9 @@ public sealed class ChronosFlipSettings
     public bool PinToTop { get; set; } = false;
 
     public WindowBounds? Window { get; set; }
+
+    /// <summary>Persisted world-clock zones (local card never included).</summary>
+    public List<ClockZoneRef>? Zones { get; set; }
 }
 
 public sealed class WindowBounds

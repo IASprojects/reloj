@@ -41,7 +41,7 @@ public sealed class SettingsStore
 
         if (!File.Exists(_filePath))
         {
-            return new ChronosFlipSettings();
+            return Sanitize(new ChronosFlipSettings());
         }
 
         try
@@ -53,7 +53,7 @@ public sealed class SettingsStore
         catch (Exception ex) when (ex is JsonException or InvalidOperationException or IOException or UnauthorizedAccessException)
         {
             QuarantineCorruptFile();
-            return new ChronosFlipSettings();
+            return Sanitize(new ChronosFlipSettings());
         }
     }
 
@@ -102,6 +102,14 @@ public sealed class SettingsStore
         {
             settings.NeonHexColor = SettingsDefaults.NeonHexColor;
         }
+
+        settings.Zones = settings.Zones?
+            .Where(zone => zone is not null &&
+                           !string.IsNullOrWhiteSpace(zone.TimeZoneId) &&
+                           !string.IsNullOrWhiteSpace(zone.Label))
+            .GroupBy(zone => zone.TimeZoneId!, StringComparer.OrdinalIgnoreCase)
+            .Select(group => group.First())
+            .ToList() ?? [];
 
         return settings;
     }

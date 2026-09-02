@@ -1,4 +1,3 @@
-using System.Globalization;
 using ChronosFlip.Core.Clocks;
 using CommunityToolkit.Mvvm.ComponentModel;
 
@@ -16,11 +15,11 @@ public partial class MainClockViewModel : ObservableObject
     [NotifyPropertyChangedFor(nameof(Seconds))]
     private DateTimeOffset _now = DateTimeOffset.MinValue;
 
-    public string Hours => Now.ToString("HH", CultureInfo.InvariantCulture);
+    public string Hours => TimeSegments.Of(Now).Hours;
 
-    public string Minutes => Now.ToString("mm", CultureInfo.InvariantCulture);
+    public string Minutes => TimeSegments.Of(Now).Minutes;
 
-    public string Seconds => Now.ToString("ss", CultureInfo.InvariantCulture);
+    public string Seconds => TimeSegments.Of(Now).Seconds;
 
     public void Attach(ClockTicker ticker)
     {

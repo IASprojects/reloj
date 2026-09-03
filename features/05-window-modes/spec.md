@@ -1,6 +1,6 @@
 # Window Modes (Topmost / Fullscreen)
 
-- **Status:** `Planned`
+- **Status:** `In Progress`
 - **Requirements:** FR-40, FR-41, FR-42, FR-43, FR-50, FR-51, FR-52 (+ NFR-05)
 - **Depends on:** 02 (shell), 03 (pin-state persistence)
 - **Stage:** 4

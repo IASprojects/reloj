@@ -6,7 +6,8 @@
     xmlns:views="using:ChronosFlip.Views">
 
     <Grid x:Name="RootGrid"
-          Background="{StaticResource AppBackgroundBrush}">
+          Background="{StaticResource AppBackgroundBrush}"
+          KeyDown="OnRootKeyDown">
 
         <controls:NeonGlowBorder x:Name="NeonShell"
                                  IsNeonEnabled="{x:Bind ViewModel.NeonEnabled, Mode=OneWay}">
@@ -27,6 +28,34 @@
                                    FontWeight="SemiBold"
                                    CharacterSpacing="140"
                                    VerticalAlignment="Center" />
+                        <ToggleButton x:Name="PinToggleButton"
+                                      Margin="8,0,0,0"
+                                      Width="30"
+                                      Height="30"
+                                      Padding="0"
+                                      Content="&#xE7C1;"
+                                      IsChecked="{x:Bind WindowMode.IsPinActive, Mode=TwoWay}"
+                                      Background="Transparent"
+                                      BorderBrush="{StaticResource CardBorderBrush}"
+                                      BorderThickness="1"
+                                      FontFamily="Segoe Fluent Icons,Segoe MDL2 Assets"
+                                      FontSize="12"
+                                      VerticalAlignment="Center"
+                                      ToolTipService.ToolTip="Pin always on top" />
+                        <Button x:Name="FullScreenButton"
+                                Margin="6,0,0,0"
+                                Width="30"
+                                Height="30"
+                                Padding="0"
+                                Content="&#xE740;"
+                                Background="Transparent"
+                                BorderBrush="{StaticResource CardBorderBrush}"
+                                BorderThickness="1"
+                                FontFamily="Segoe Fluent Icons,Segoe MDL2 Assets"
+                                FontSize="12"
+                                VerticalAlignment="Center"
+                                Click="OnFullScreenClicked"
+                                ToolTipService.ToolTip="Fullscreen clock" />
                         <Button x:Name="AddZoneButton"
                                 Margin="8,0,0,0"
                                 Width="30"
@@ -76,6 +105,96 @@
                                                                 ZoneLabel="{Binding Label}"
                                                                 Offset="{Binding OffsetText}"
                                                                 Margin="{StaticResource WorldClockCardGap}" />
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </Grid>
+            </controls:NeonGlowBorder.InnerContent>
+        </controls:NeonGlowBorder>
+
+        <controls:NeonGlowBorder x:Name="NeonShellFullScreen"
+                                 Visibility="Collapsed"
+                                 IsNeonEnabled="{x:Bind ViewModel.NeonEnabled, Mode=OneWay}">
+            <controls:NeonGlowBorder.InnerContent>
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="*" />
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
+
+                    <Button x:Name="ExitFullScreenButton"
+                            Margin="16"
+                            HorizontalAlignment="Right"
+                            VerticalAlignment="Top"
+                            Width="36"
+                            Height="36"
+                            Padding="0"
+                            Content="&#xE711;"
+                            Background="Transparent"
+                            BorderBrush="{StaticResource CardBorderBrush}"
+                            BorderThickness="1"
+                            FontFamily="Segoe Fluent Icons,Segoe MDL2 Assets"
+                            FontSize="14"
+                            Click="OnFullScreenClicked"
+                            ToolTipService.ToolTip="Exit fullscreen (Esc)" />
+
+                    <StackPanel Grid.Row="0"
+                                Spacing="12"
+                                HorizontalAlignment="Center"
+                                VerticalAlignment="Center">
+                        <TextBlock Text="{x:Bind WorldClock.LocalCard.Label, Mode=OneWay}"
+                                   Foreground="{StaticResource LabelTextBrush}"
+                                   FontFamily="{StaticResource JetBrainsMonoFont}"
+                                   FontSize="13"
+                                   FontWeight="SemiBold"
+                                   CharacterSpacing="160"
+                                   HorizontalAlignment="Center" />
+                        <TextBlock Text="{x:Bind WorldClock.LocalCard.TimeHMS, Mode=OneWay}"
+                                   Foreground="{StaticResource TextOnCardBrush}"
+                                   FontFamily="{StaticResource SpaceMonoFont}"
+                                   FontSize="88"
+                                   FontWeight="Bold"
+                                   CharacterSpacing="-30"
+                                   HorizontalAlignment="Center" />
+                        <TextBlock Text="{x:Bind WorldClock.LocalCard.DateText, Mode=OneWay}"
+                                   Foreground="{StaticResource LabelTextBrush}"
+                                   FontFamily="{StaticResource SpaceMonoFont}"
+                                   FontSize="16"
+                                   CharacterSpacing="60"
+                                   HorizontalAlignment="Center" />
+                    </StackPanel>
+
+                    <ItemsControl Grid.Row="1"
+                                  ItemsSource="{x:Bind OtherCards, Mode=OneWay}"
+                                  Margin="24,0,24,24"
+                                  HorizontalAlignment="Stretch">
+                        <ItemsControl.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <ItemsWrapGrid Orientation="Horizontal"
+                                               HorizontalAlignment="Center"
+                                               MaximumRowsOrColumns="6" />
+                            </ItemsPanelTemplate>
+                        </ItemsControl.ItemsPanel>
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <StackPanel Orientation="Horizontal" Spacing="12" Margin="8,4">
+                                    <TextBlock Text="{Binding Label}"
+                                               Foreground="{StaticResource LabelTextBrush}"
+                                               FontFamily="{StaticResource JetBrainsMonoFont}"
+                                               FontSize="11"
+                                               FontWeight="SemiBold"
+                                               CharacterSpacing="80"
+                                               VerticalAlignment="Center"
+                                               TextTrimming="CharacterEllipsis"
+                                               MaxWidth="160" />
+                                    <TextBlock Text="{Binding Time}"
+                                               Foreground="{StaticResource TextOnCardBrush}"
+                                               FontFamily="{StaticResource SpaceMonoFont}"
+                                               FontSize="28"
+                                               FontWeight="Bold"
+                                               CharacterSpacing="-20"
+                                               VerticalAlignment="Center" />
+                                </StackPanel>
                             </DataTemplate>
                         </ItemsControl.ItemTemplate>
                     </ItemsControl>

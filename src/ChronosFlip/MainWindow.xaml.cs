@@ -1,14 +1,18 @@
+using System.Collections.ObjectModel;
 using System.Collections.Specialized;
+using System.ComponentModel;
 using System.Runtime.InteropServices;
 using ChronosFlip.Core.Clocks;
 using ChronosFlip.Core.Settings;
 using ChronosFlip.Core.ViewModels;
+using ChronosFlip.Core.WindowModes;
 using ChronosFlip.Core.WorldClock;
 using ChronosFlip.Services;
-using Microsoft.UI;
 using Microsoft.UI.Xaml;
+using Microsoft.UI.Xaml.Input;
 using Microsoft.UI.Xaml.Media;
 using Windows.Graphics;
+using Windows.System;
 using WinRT.Interop;
 
 namespace ChronosFlip;
@@ -19,6 +23,7 @@ public sealed partial class MainWindow : Window
     private readonly SettingsStore _settingsStore;
     private readonly ZonePickerViewModel _zonePicker;
     private readonly IntPtr _hwnd;
+    private readonly WinUIWindowModeService _windowModeService;
 
     public MainWindow()
     {
@@ -37,11 +42,17 @@ public sealed partial class MainWindow : Window
         WorldClock = new WorldClockViewModel(new SystemZoneResolver(), ViewModel.Zones);
         WorldClock.Cards.CollectionChanged += OnCardsChanged;
         WorldClock.Attach(ticker);
+        RefreshOtherCards();
 
         _zonePicker = new ZonePickerViewModel(new ClockZoneFactory(new SystemZoneResolver()));
         _zonePicker.Reset(WorldClock.Cards.Select(card => card.TimeZoneId));
 
         _clock = new ClockService(DispatcherQueue, ticker);
+
+        _windowModeService = new WinUIWindowModeService(this, _hwnd);
+        WindowMode = new WindowModeViewModel(_windowModeService, ViewModel);
+        WindowMode.PropertyChanged += OnWindowModePropertyChanged;
+        ApplyShellMode(false);
 
         RootGrid.DataContext = WorldClock;
         _clock.Start();
@@ -54,7 +65,7 @@ public sealed partial class MainWindow : Window
 
         Title = "Chronos Flip";
         RestoreWindowBounds(loaded);
-        ApplyPinToTop(loaded.PinToTop);
+        _windowModeService.SetTopmost(loaded.PinToTop);
 
         Closed += OnClosed;
     }
@@ -62,6 +73,11 @@ public sealed partial class MainWindow : Window
     public SettingsViewModel ViewModel { get; }
 
     public WorldClockViewModel WorldClock { get; }
+
+    public WindowModeViewModel WindowMode { get; }
+
+    /// <summary>Non-local zone cards for the fullscreen bottom strip.</summary>
+    public ObservableCollection<WorldClockCardViewModel> OtherCards { get; } = new();
 
     private void OnClosed(object sender, WindowEventArgs args)
     {
@@ -82,9 +98,59 @@ public sealed partial class MainWindow : Window
 
     private void OnCardsChanged(object? sender, NotifyCollectionChangedEventArgs e)
     {
+        RefreshOtherCards();
         _zonePicker.Reset(WorldClock.Cards.Select(card => card.TimeZoneId));
         ViewModel.SetZones(WorldClock.ZonesToPersist());
         ViewModel.Save();
+    }
+
+    private void RefreshOtherCards()
+    {
+        OtherCards.Clear();
+        foreach (var card in WorldClock.Cards.Where(card => !ReferenceEquals(card, WorldClock.LocalCard)))
+        {
+            OtherCards.Add(card);
+        }
+    }
+
+    private void OnWindowModePropertyChanged(object? sender, PropertyChangedEventArgs e)
+    {
+        if (e.PropertyName != nameof(WindowModeViewModel.IsFullScreen))
+        {
+            return;
+        }
+
+        var fullScreen = WindowMode.IsFullScreen;
+        ApplyShellMode(fullScreen);
+
+        if (fullScreen)
+        {
+            ExitFullScreenButton.Focus(FocusState.Programmatic);
+        }
+        else
+        {
+            SaveWindowBounds();
+        }
+    }
+
+    private void ApplyShellMode(bool fullScreen)
+    {
+        NeonShell.Visibility = fullScreen ? Visibility.Collapsed : Visibility.Visible;
+        NeonShellFullScreen.Visibility = fullScreen ? Visibility.Visible : Visibility.Collapsed;
+    }
+
+    private void OnFullScreenClicked(object sender, RoutedEventArgs e)
+    {
+        WindowMode.ToggleFullScreen();
+    }
+
+    private void OnRootKeyDown(object sender, KeyRoutedEventArgs e)
+    {
+        if (e.Key == VirtualKey.Escape && WindowMode.IsFullScreen)
+        {
+            e.Handled = true;
+            WindowMode.RequestExit();
+        }
     }
 
     private void ApplyNeonAccent(string hex)
@@ -95,6 +161,7 @@ public sealed partial class MainWindow : Window
         }
 
         NeonShell.AccentColor = color;
+        NeonShellFullScreen.AccentColor = color;
 
         if (Application.Current?.Resources is null)
         {
@@ -123,16 +190,13 @@ public sealed partial class MainWindow : Window
         AppWindow.Resize(new SizeInt32(SettingsDefaults.WindowWidth, SettingsDefaults.WindowHeight));
     }
 
-    private void ApplyPinToTop(bool pin)
-    {
-        SetWindowPos(_hwnd,
-            pin ? HWND_TOPMOST : HWND_NOTOPMOST,
-            0, 0, 0, 0,
-            SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE);
-    }
-
     private void SaveWindowBounds()
     {
+        if (WindowMode.IsFullScreen)
+        {
+            return;
+        }
+
         try
         {
             if (!GetWindowRect(_hwnd, out var rect))
@@ -160,16 +224,6 @@ public sealed partial class MainWindow : Window
         {
         }
     }
-
-    private const int HWND_TOPMOST = -1;
-    private const int HWND_NOTOPMOST = -2;
-    private const int SWP_NOMOVE = 0x0002;
-    private const int SWP_NOSIZE = 0x0001;
-    private const int SWP_NOACTIVATE = 0x0010;
-
-    [DllImport("user32.dll", SetLastError = true)]
-    [return: MarshalAs(UnmanagedType.Bool)]
-    private static extern bool SetWindowPos(IntPtr hWnd, int hWndInsertAfter, int X, int Y, int cx, int cy, uint uFlags);
 
     [DllImport("user32.dll")]
     [return: MarshalAs(UnmanagedType.Bool)]

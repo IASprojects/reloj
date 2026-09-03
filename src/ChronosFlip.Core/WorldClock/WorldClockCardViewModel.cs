@@ -19,6 +19,8 @@ public partial class WorldClockCardViewModel : ObservableObject
     [NotifyPropertyChangedFor(nameof(Seconds))]
     [NotifyPropertyChangedFor(nameof(OffsetText))]
     [NotifyPropertyChangedFor(nameof(Time))]
+    [NotifyPropertyChangedFor(nameof(TimeHMS))]
+    [NotifyPropertyChangedFor(nameof(DateText))]
     private DateTimeOffset _now = DateTimeOffset.MinValue;
 
     public WorldClockCardViewModel(string label, string timeZoneId, TimeZoneInfo zone)
@@ -43,6 +45,12 @@ public partial class WorldClockCardViewModel : ObservableObject
 
     /// <summary>Zone wall-clock "HH:MM" for compact tray cards.</summary>
     public string Time => $"{Hours}:{Minutes}";
+
+    /// <summary>Zone wall-clock "HH:MM:SS" for the fullscreen display clock (FR-41).</summary>
+    public string TimeHMS => $"{Hours}:{Minutes}:{Seconds}";
+
+    /// <summary>Abbreviated zone date label for the fullscreen clock, e.g. "Tue, Sep 2".</summary>
+    public string DateText => Now.ToString("ddd, MMM d", System.Globalization.CultureInfo.InvariantCulture);
 
     /// <summary>True when the card may be removed from the tray (the local card cannot).</summary>
     public bool IsRemovable { get; set; } = true;

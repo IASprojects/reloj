@@ -62,7 +62,7 @@ public sealed class WorldClockCardViewModelTests
         Assert.Contains(nameof(WorldClockCardViewModel.Minutes), changed);
         Assert.Contains(nameof(WorldClockCardViewModel.Seconds), changed);
         Assert.Contains(nameof(WorldClockCardViewModel.OffsetText), changed);
-    }
+}
 
     [Fact]
     public void Time_FormatsHoursAndMinutes()
@@ -72,6 +72,39 @@ public sealed class WorldClockCardViewModelTests
         card.SetPresent(new DateTimeOffset(2026, 7, 15, 0, 0, 0, TimeSpan.Zero));
 
         Assert.Equal("02:00", card.Time);
+    }
+
+    [Fact]
+    public void TimeHMS_FormatsHoursMinutesSeconds()
+    {
+        var card = new WorldClockCardViewModel("Test", "SpringFallTest", SpringFallZone);
+
+        card.SetPresent(new DateTimeOffset(2026, 7, 15, 3, 4, 5, TimeSpan.Zero));
+
+        Assert.Equal("05:04:05", card.TimeHMS);
+    }
+
+    [Fact]
+    public void DateText_FormatsAbbreviatedDayAndMonth()
+    {
+        var card = new WorldClockCardViewModel("Test", "SpringFallTest", SpringFallZone);
+
+        card.SetPresent(new DateTimeOffset(2026, 9, 2, 0, 0, 0, TimeSpan.Zero));
+
+        Assert.Equal("Wed, Sep 2", card.DateText);
+    }
+
+    [Fact]
+    public void TimeHMS_And_DateText_RaisePropertyChanged_OnTick()
+    {
+        var card = new WorldClockCardViewModel("Test", "SpringFallTest", SpringFallZone);
+        var changed = new List<string?>();
+        card.PropertyChanged += (_, e) => changed.Add(e.PropertyName);
+
+        card.SetPresent(new DateTimeOffset(2026, 9, 2, 12, 0, 0, TimeSpan.Zero));
+
+        Assert.Contains(nameof(WorldClockCardViewModel.TimeHMS), changed);
+        Assert.Contains(nameof(WorldClockCardViewModel.DateText), changed);
     }
 
     [Fact]

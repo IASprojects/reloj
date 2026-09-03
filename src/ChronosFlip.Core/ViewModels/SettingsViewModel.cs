@@ -23,6 +23,10 @@ public partial class SettingsViewModel : ObservableObject
     [ObservableProperty]
     private bool _pinToTop;
 
+    /// <summary>Last countdown duration in seconds (FR-33), persisted on save.</summary>
+    [ObservableProperty]
+    private int _timerPresetSeconds = SettingsDefaults.TimerPresetSeconds;
+
     /// <summary>Current world-clock tray zones in order (persisted on save).</summary>
     public IReadOnlyList<ClockZone> Zones { get; private set; } = [];
 
@@ -50,6 +54,7 @@ public partial class SettingsViewModel : ObservableObject
             PinToTop = PinToTop,
             Zones = Zones.Select(ClockZoneRef.FromClockZone).ToList(),
             Alarms = Alarms.ToList(),
+            TimerPresetSeconds = TimerPresetSeconds,
             Window = _store.Load().Window,
         };
         _store.Save(settings);
@@ -63,6 +68,7 @@ public partial class SettingsViewModel : ObservableObject
             ? SettingsDefaults.NeonHexColor
             : settings.NeonHexColor;
         PinToTop = settings.PinToTop;
+        TimerPresetSeconds = settings.TimerPresetSeconds;
         Zones = settings.Zones?
             .Where(zone => zone is not null)
             .Select(zone => zone!.ToClockZone())

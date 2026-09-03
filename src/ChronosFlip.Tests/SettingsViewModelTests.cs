@@ -138,6 +138,21 @@ public sealed class SettingsViewModelTests : IDisposable
     }
 
     [Fact]
+    public void TimerPreset_PersistsOnSave_AndAppliesOnLoad()
+    {
+        var store = new SettingsStore(_directory);
+        var vm = new SettingsViewModel(store);
+        vm.Load();
+        vm.TimerPresetSeconds = 90;
+
+        vm.Save();
+        var reloaded = new SettingsViewModel(store);
+        reloaded.Load();
+
+        Assert.Equal(90, reloaded.TimerPresetSeconds);
+    }
+
+    [Fact]
     public void Apply_TreatsNullZonesAsEmpty()
     {
         var vm = new SettingsViewModel(new SettingsStore(_directory));

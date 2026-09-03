@@ -20,6 +20,9 @@ public sealed class ChronosFlipSettings
 
     /// <summary>Persisted alarms (FR-23): absolute instants survive restart.</summary>
     public List<AlarmRef>? Alarms { get; set; }
+
+    /// <summary>Last countdown duration in seconds (FR-33); restored on launch.</summary>
+    public int TimerPresetSeconds { get; set; } = SettingsDefaults.TimerPresetSeconds;
 }
 
 public sealed class WindowBounds
@@ -40,4 +43,5 @@ public static class SettingsDefaults
     public const string NeonHexColor = "#00E5FF";
     public const int WindowWidth = 720;
     public const int WindowHeight = 340;
+    public const int TimerPresetSeconds = 300;
 }

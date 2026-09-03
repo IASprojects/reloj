@@ -31,6 +31,11 @@
     <x:Double x:Key="WorldClockCardHeight">96</x:Double>
     <Thickness x:Key="WorldClockCardGap">6</Thickness>
 
+    <!-- Timer flip digits (compact MM/SS cards, FR-31) -->
+    <x:Double x:Key="TimerDigitWidth">60</x:Double>
+    <x:Double x:Key="TimerDigitHeight">68</x:Double>
+    <x:Double x:Key="TimerDigitFontSize">44</x:Double>
+
     <!-- Shell layout -->
     <GridLength x:Key="SidebarWidth">48</GridLength>
 

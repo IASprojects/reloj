@@ -110,6 +110,24 @@ VerticalAlignment="Center"
                                         </Flyout>
                                     </Button.Flyout>
                                 </Button>
+                                <Button x:Name="TimerButton"
+                                        Margin="6,0,0,0"
+                                        Width="30"
+                                        Height="30"
+                                        Padding="0"
+                                        Content="&#xE917;"
+                                        Background="Transparent"
+                                        BorderBrush="{StaticResource CardBorderBrush}"
+                                        BorderThickness="1"
+                                        FontFamily="Segoe Fluent Icons,Segoe MDL2 Assets"
+                                        FontSize="12"
+                                        ToolTipService.ToolTip="Timer">
+                                    <Button.Flyout>
+                                        <Flyout Placement="BottomEdgeAlignedRight">
+                                            <views:TimerView x:Name="TimerPanel" />
+                                        </Flyout>
+                                    </Button.Flyout>
+                                </Button>
                                 <Button x:Name="SettingsButton"
                                         Margin="6,0,0,0"
                                         Width="30"
@@ -218,13 +236,14 @@ VerticalAlignment="Center"
                                               FontSize="14"
                                               Foreground="{StaticResource TextOnCardBrush}" />
                                 </Button>
-                                <Button Width="32"
+<Button x:Name="SidebarTimerButton"
+                                        Width="32"
                                         Height="32"
                                         Padding="0"
                                         Background="Transparent"
                                         BorderBrush="{StaticResource CardBorderBrush}"
                                         BorderThickness="0"
-                                        IsEnabled="False"
+                                        Click="OnSidebarTimerClicked"
                                         ToolTipService.ToolTip="Timer">
                                     <FontIcon Glyph="&#xE917;"
                                               FontSize="14"

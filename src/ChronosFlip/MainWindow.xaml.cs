@@ -5,6 +5,7 @@ using System.Runtime.InteropServices;
 using ChronosFlip.Core.Alarms;
 using ChronosFlip.Core.Clocks;
 using ChronosFlip.Core.Settings;
+using ChronosFlip.Core.Timers;
 using ChronosFlip.Core.ViewModels;
 using ChronosFlip.Core.WindowModes;
 using ChronosFlip.Core.WorldClock;
@@ -65,6 +66,13 @@ public sealed partial class MainWindow : Window
         ticker.Tick += (_, now) => Alarms.Evaluate(now);
         RefreshCardAlarmState();
 
+        Timer = new TimerViewModel();
+        Timer.RestoreDuration(loaded.TimerPresetSeconds);
+        Timer.Timer.PropertyChanged += OnTimerEnginePropertyChanged;
+        Timer.Expired += (_, _) => _alarmChime.Start();
+        Timer.PropertyChanged += OnTimerViewModelPropertyChanged;
+        ticker.Tick += (_, now) => Timer.Evaluate(now);
+
         _clock = new ClockService(DispatcherQueue, ticker);
 
         _windowModeService = new WinUIWindowModeService(this, _hwnd);
@@ -84,6 +92,8 @@ public sealed partial class MainWindow : Window
         AlarmPanel.ViewModel = Alarms;
         AlarmPanel.SetZones(AllZonesForAlarmPicker());
 
+        TimerPanel.ViewModel = Timer;
+
         Title = "Chronos Flip";
         RestoreWindowBounds(loaded);
         _windowModeService.SetTopmost(loaded.PinToTop);
@@ -98,6 +108,8 @@ public sealed partial class MainWindow : Window
     public WindowModeViewModel WindowMode { get; }
 
     public AlarmViewModel Alarms { get; }
+
+    public TimerViewModel Timer { get; }
 
     /// <summary>Non-local zone cards for the fullscreen bottom strip.</summary>
     public ObservableCollection<WorldClockCardViewModel> OtherCards { get; } = new();
@@ -301,6 +313,30 @@ public sealed partial class MainWindow : Window
         RefreshCardAlarmState();
     }
 
+    /// <summary>
+    /// Persists the countdown preset when the user edits the duration (FR-33);
+    /// stops the expiry chime when a reset brings the timer back to Idle
+    /// (without silencing a concurrently ringing alarm).
+    /// </summary>
+    private void OnTimerViewModelPropertyChanged(object? sender, PropertyChangedEventArgs e)
+    {
+        if (e.PropertyName is nameof(TimerViewModel.InputMinutes) or nameof(TimerViewModel.InputSeconds))
+        {
+            ViewModel.TimerPresetSeconds = (int)Timer.Timer.Duration.TotalSeconds;
+            ViewModel.Save();
+        }
+    }
+
+    private void OnTimerEnginePropertyChanged(object? sender, PropertyChangedEventArgs e)
+    {
+        if (e.PropertyName == nameof(CountdownTimer.State) &&
+            Timer.Timer.State == TimerState.Idle &&
+            Alarms.RingingCount == 0)
+        {
+            _alarmChime.Stop();
+        }
+    }
+
     private void OnAlarmsChanged(object? sender, EventArgs e)
     {
         RefreshCardAlarmState();
@@ -394,6 +430,11 @@ public sealed partial class MainWindow : Window
         AlarmButton.Flyout.ShowAt(SidebarAlarmButton);
     }
 
+    private void OnSidebarTimerClicked(object sender, RoutedEventArgs e)
+    {
+        TimerButton.Flyout.ShowAt(SidebarTimerButton);
+    }
+
     private void OnRootKeyDown(object sender, KeyRoutedEventArgs e)
     {
         if (e.Key == VirtualKey.Escape && WindowMode.IsFullScreen)
@@ -463,6 +504,7 @@ public sealed partial class MainWindow : Window
                 PinToTop = ViewModel.PinToTop,
                 Zones = ViewModel.Zones.Select(ClockZoneRef.FromClockZone).ToList(),
                 Alarms = ViewModel.Alarms.ToList(),
+                TimerPresetSeconds = ViewModel.TimerPresetSeconds,
                 Window = new WindowBounds
                 {
                     X = rect.left,

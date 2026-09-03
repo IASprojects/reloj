@@ -1,6 +1,6 @@
 # Timer
 
-- **Status:** `Planned`
+- **Status:** `Done`
 - **Requirements:** FR-30, FR-31, FR-32, FR-33
 - **Depends on:** 02 (flip card + tick), optionally 03 (preferred last value)
 - **Stage:** 6
@@ -16,7 +16,8 @@ visual count-down on flip-card digits and a completion notification.
   injected clock for testability.
 - Set minutes/seconds UI; start/pause/reset controls.
 - Digits render on a flip card, updated from the shared 1s tick.
-- Completion: notification + state reset (FR-31/FR-32).
+- Completion: looping notification + sticky `00:00` EXPIRED state, reset by the
+  user (FR-31/FR-32).
 - Optionally persist last duration (FR-33: survive minimize; restart optional).
 
 ## Out of scope
@@ -26,7 +27,8 @@ visual count-down on flip-card digits and a completion notification.
 ## Acceptance Criteria
 
 - Pause/resume keeps elapsed accuracy (no drift from lost ticks).
-- Expiry triggers notification exactly once and resets.
+- Expiry triggers notification exactly once; the timer holds `00:00` until the
+  user resets (sticky EXPIRED with looping chime, alarm-style UX).
 - All transitions testable with a fake clock.
 
 ## Verification

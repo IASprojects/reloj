@@ -292,4 +292,42 @@ public sealed class SettingsStoreTests : IDisposable
         Assert.NotNull(loaded.Alarms);
         Assert.Single(loaded.Alarms!);
     }
+
+    [Fact]
+    public void Load_DefaultsTimerPreset_WhenMissing()
+    {
+        var store = new SettingsStore(_directory);
+        Directory.CreateDirectory(_directory);
+        File.WriteAllText(store.FilePath, "{\"NeonEnabled\":true}");
+
+        var loaded = store.Load();
+
+        Assert.Equal(SettingsDefaults.TimerPresetSeconds, loaded.TimerPresetSeconds);
+    }
+
+    [Fact]
+    public void Save_Then_Load_RoundTripsTimerPreset()
+    {
+        var store = new SettingsStore(_directory);
+        store.Save(new ChronosFlipSettings { TimerPresetSeconds = 90 });
+
+        var loaded = store.Load();
+
+        Assert.Equal(90, loaded.TimerPresetSeconds);
+    }
+
+    [Theory]
+    [InlineData(0)]
+    [InlineData(-5)]
+    [InlineData(6000)]
+    public void Load_RejectsOutOfRangeTimerPreset_WithDefault(int value)
+    {
+        var store = new SettingsStore(_directory);
+        Directory.CreateDirectory(_directory);
+        File.WriteAllText(store.FilePath, $"{{\"TimerPresetSeconds\":{value}}}");
+
+        var loaded = store.Load();
+
+        Assert.Equal(SettingsDefaults.TimerPresetSeconds, loaded.TimerPresetSeconds);
+    }
 }

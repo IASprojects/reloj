@@ -14,7 +14,7 @@ Status labels:
 | 04 | World Clock | FR-06, FR-10, FR-12, FR-13 | `Done` |
 | 05 | Window Modes (Topmost/Fullscreen) | FR-40–43, FR-50–52 | `In Progress` |
 | 06 | Alarms | FR-20–23 | `Done` |
-| 07 | Timer | FR-30–33 | `Planned` |
+| 07 | Timer | FR-30–33 | `Done` |
 | 08 | Neon Per Card (P2) | FR-64 | `Planned` |
 | 09 | Polish & Hardening | NFR-02/06/07 | `Planned` |
 | 10 | Installer & Publishing | NFR-05 + distribution | `Planned` |

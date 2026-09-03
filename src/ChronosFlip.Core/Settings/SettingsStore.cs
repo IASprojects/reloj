@@ -104,6 +104,10 @@ public sealed class SettingsStore
             settings.NeonHexColor = SettingsDefaults.NeonHexColor;
         }
 
+        settings.TimerPresetSeconds = settings.TimerPresetSeconds is >= 1 and <= (int)ChronosFlip.Core.Timers.CountdownTimer.MaxSeconds
+            ? settings.TimerPresetSeconds
+            : SettingsDefaults.TimerPresetSeconds;
+
         settings.Zones = settings.Zones?
             .Where(zone => zone is not null &&
                            !string.IsNullOrWhiteSpace(zone.TimeZoneId) &&

@@ -1,0 +1,165 @@
+<UserControl
+    x:Class="ChronosFlip.Views.TimerView"
+    x:Name="Root"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:conv="using:ChronosFlip.Converters">
+
+    <UserControl.Resources>
+        <conv:BoolToVisibilityConverter x:Key="BoolToVisibility" />
+        <Style x:Key="TimerDigitCard" TargetType="Border">
+            <Setter Property="Width" Value="{StaticResource TimerDigitWidth}" />
+            <Setter Property="Height" Value="{StaticResource TimerDigitHeight}" />
+            <Setter Property="Background" Value="{StaticResource CardSurfaceBrush}" />
+            <Setter Property="BorderBrush" Value="{StaticResource CardBorderBrush}" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="CornerRadius" Value="{StaticResource CardCornerRadius}" />
+        </Style>
+        <Style x:Key="TimerDigitText" TargetType="TextBlock">
+            <Setter Property="Foreground" Value="{StaticResource TextOnCardBrush}" />
+            <Setter Property="FontFamily" Value="{StaticResource SpaceMonoFont}" />
+            <Setter Property="FontSize" Value="{StaticResource TimerDigitFontSize}" />
+            <Setter Property="FontWeight" Value="Bold" />
+            <Setter Property="CharacterSpacing" Value="-30" />
+        </Style>
+        <Style x:Key="TimerNumberBox" TargetType="NumberBox">
+            <Setter Property="FontFamily" Value="{StaticResource SpaceMonoFont}" />
+            <Setter Property="FontSize" Value="16" />
+            <Setter Property="SpinButtonPlacementMode" Value="Compact" />
+            <Setter Property="HorizontalAlignment" Value="Stretch" />
+        </Style>
+    </UserControl.Resources>
+
+    <StackPanel Width="360" Spacing="12">
+        <TextBlock Text="TIMER"
+                   Foreground="{StaticResource TextOnCardBrush}"
+                   FontFamily="{StaticResource SpaceMonoFont}"
+                   FontSize="16"
+                   FontWeight="Bold"
+                   CharacterSpacing="60" />
+
+        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center"
+                    VerticalAlignment="Center" Spacing="16">
+            <StackPanel Spacing="8">
+                <Border Style="{StaticResource TimerDigitCard}">
+                    <Grid>
+                        <Rectangle Height="1"
+                                   VerticalAlignment="Center"
+                                   HorizontalAlignment="Stretch"
+                                   Fill="{StaticResource FlipSplitBrush}"
+                                   IsHitTestVisible="False" />
+                        <TextBlock Text="{x:Bind ViewModel.Timer.RemainingMinutes, Mode=OneWay}"
+                                   Style="{StaticResource TimerDigitText}"
+                                   HorizontalAlignment="Center"
+                                   VerticalAlignment="Center" />
+                    </Grid>
+                </Border>
+                <TextBlock Text="MIN"
+                           Foreground="{StaticResource LabelTextBrush}"
+                           FontFamily="{StaticResource JetBrainsMonoFont}"
+                           FontSize="9"
+                           FontWeight="SemiBold"
+                           CharacterSpacing="80"
+                           HorizontalAlignment="Center" />
+            </StackPanel>
+
+            <Ellipse Width="5"
+                     Height="5"
+                     Fill="{StaticResource ColonDotBrush}"
+                     VerticalAlignment="Center" />
+
+            <StackPanel Spacing="8">
+                <Border Style="{StaticResource TimerDigitCard}">
+                    <Grid>
+                        <Rectangle Height="1"
+                                   VerticalAlignment="Center"
+                                   HorizontalAlignment="Stretch"
+                                   Fill="{StaticResource FlipSplitBrush}"
+                                   IsHitTestVisible="False" />
+                        <TextBlock Text="{x:Bind ViewModel.Timer.RemainingSeconds, Mode=OneWay}"
+                                   Style="{StaticResource TimerDigitText}"
+                                   HorizontalAlignment="Center"
+                                   VerticalAlignment="Center" />
+                    </Grid>
+                </Border>
+                <TextBlock Text="SEC"
+                           Foreground="{StaticResource LabelTextBrush}"
+                           FontFamily="{StaticResource JetBrainsMonoFont}"
+                           FontSize="9"
+                           FontWeight="SemiBold"
+                           CharacterSpacing="80"
+                           HorizontalAlignment="Center" />
+            </StackPanel>
+        </StackPanel>
+
+        <Rectangle Height="1" Fill="{StaticResource CardBorderBrush}" />
+
+        <StackPanel Spacing="6">
+            <TextBlock Text="DURATION"
+                       Foreground="{StaticResource LabelTextBrush}"
+                       FontFamily="{StaticResource JetBrainsMonoFont}"
+                       FontSize="10"
+                       FontWeight="SemiBold"
+                       CharacterSpacing="100" />
+            <Grid ColumnSpacing="8">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+                <NumberBox Grid.Column="0"
+                           Style="{StaticResource TimerNumberBox}"
+                           Minimum="0"
+                           Maximum="99"
+                           SmallChange="1"
+                           Value="{x:Bind ViewModel.InputMinutes, Mode=TwoWay}"
+                           IsEnabled="{x:Bind ViewModel.CanEditDuration, Mode=OneWay}" />
+                <NumberBox Grid.Column="1"
+                           Style="{StaticResource TimerNumberBox}"
+                           Minimum="0"
+                           Maximum="59"
+                           SmallChange="1"
+                           Value="{x:Bind ViewModel.InputSeconds, Mode=TwoWay}"
+                           IsEnabled="{x:Bind ViewModel.CanEditDuration, Mode=OneWay}" />
+            </Grid>
+        </StackPanel>
+
+        <StackPanel Orientation="Horizontal" Spacing="8">
+            <Button x:Name="StartButton"
+                    Content="START"
+                    Click="OnStartClicked"
+                    Visibility="{x:Bind ViewModel.CanStart, Mode=OneWay, Converter={StaticResource BoolToVisibility}}"
+                    Background="Transparent"
+                    BorderBrush="{StaticResource CardBorderBrush}"
+                    BorderThickness="1"
+                    Padding="12,6"
+                    FontFamily="{StaticResource JetBrainsMonoFont}"
+                    FontSize="10"
+                    FontWeight="SemiBold"
+                    CharacterSpacing="80" />
+            <Button x:Name="PauseButton"
+                    Content="PAUSE"
+                    Click="OnPauseClicked"
+                    Visibility="{x:Bind ViewModel.CanPause, Mode=OneWay, Converter={StaticResource BoolToVisibility}}"
+                    Background="Transparent"
+                    BorderBrush="{StaticResource CardBorderBrush}"
+                    BorderThickness="1"
+                    Padding="12,6"
+                    FontFamily="{StaticResource JetBrainsMonoFont}"
+                    FontSize="10"
+                    FontWeight="SemiBold"
+                    CharacterSpacing="80" />
+            <Button x:Name="ResetButton"
+                    Content="RESET"
+                    Click="OnResetClicked"
+                    Visibility="{x:Bind ViewModel.CanReset, Mode=OneWay, Converter={StaticResource BoolToVisibility}}"
+                    Background="Transparent"
+                    BorderBrush="{StaticResource CardBorderBrush}"
+                    BorderThickness="1"
+                    Padding="12,6"
+                    FontFamily="{StaticResource JetBrainsMonoFont}"
+                    FontSize="10"
+                    FontWeight="SemiBold"
+                    CharacterSpacing="80" />
+        </StackPanel>
+    </StackPanel>
+</UserControl>

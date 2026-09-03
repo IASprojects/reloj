@@ -1,3 +1,4 @@
+using ChronosFlip.Core.Alarms;
 using ChronosFlip.Core.Settings;
 using ChronosFlip.Core.WorldClock;
 using CommunityToolkit.Mvvm.ComponentModel;
@@ -25,6 +26,9 @@ public partial class SettingsViewModel : ObservableObject
     /// <summary>Current world-clock tray zones in order (persisted on save).</summary>
     public IReadOnlyList<ClockZone> Zones { get; private set; } = [];
 
+    /// <summary>Persisted alarms in list order (persisted on save).</summary>
+    public IReadOnlyList<AlarmRef> Alarms { get; private set; } = [];
+
     public SettingsViewModel(SettingsStore store)
     {
         _store = store ?? throw new ArgumentNullException(nameof(store));
@@ -45,6 +49,7 @@ public partial class SettingsViewModel : ObservableObject
             NeonHexColor = NeonHexColor,
             PinToTop = PinToTop,
             Zones = Zones.Select(ClockZoneRef.FromClockZone).ToList(),
+            Alarms = Alarms.ToList(),
             Window = _store.Load().Window,
         };
         _store.Save(settings);
@@ -64,7 +69,9 @@ public partial class SettingsViewModel : ObservableObject
             .Where(zone => zone is not null)
             .Cast<ClockZone>()
             .ToList() ?? [];
+        Alarms = settings.Alarms?.Where(alarm => alarm is not null).Select(alarm => alarm!).ToList() ?? [];
         OnPropertyChanged(nameof(Zones));
+        OnPropertyChanged(nameof(Alarms));
     }
 
     /// <summary>Installs the current world-clock tray zones (persisted on next save).</summary>
@@ -73,5 +80,13 @@ public partial class SettingsViewModel : ObservableObject
         ArgumentNullException.ThrowIfNull(zones);
         Zones = zones.ToList();
         OnPropertyChanged(nameof(Zones));
+    }
+
+    /// <summary>Installs the current alarms (persisted on next save).</summary>
+    public void SetAlarms(IEnumerable<AlarmRef> alarms)
+    {
+        ArgumentNullException.ThrowIfNull(alarms);
+        Alarms = alarms.ToList();
+        OnPropertyChanged(nameof(Alarms));
     }
 }

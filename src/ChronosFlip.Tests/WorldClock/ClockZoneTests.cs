@@ -63,6 +63,33 @@ public sealed class ClockZoneTests
     }
 
     [Fact]
+    public void FromZoneTime_StandardTime_ReturnsExpectedUtc()
+    {
+        var utc = TimeZoneConverter.FromZoneTime(new DateTime(2026, 1, 15, 10, 0, 0), SpringFallZone);
+
+        Assert.Equal(new DateTimeOffset(2026, 1, 15, 9, 0, 0, TimeSpan.Zero), utc);
+    }
+
+    [Fact]
+    public void FromZoneTime_DaylightTime_SubtractsDstOffset()
+    {
+        var utc = TimeZoneConverter.FromZoneTime(new DateTime(2026, 7, 15, 10, 0, 0), SpringFallZone);
+
+        Assert.Equal(new DateTimeOffset(2026, 7, 15, 8, 0, 0, TimeSpan.Zero), utc);
+    }
+
+    [Fact]
+    public void RoundTrip_FromZoneTime_Then_ToZoneTime_IsStable()
+    {
+        var wall = new DateTime(2026, 9, 4, 6, 45, 0);
+        var utc = TimeZoneConverter.FromZoneTime(wall, SpringFallZone);
+
+        var back = TimeZoneConverter.ToZoneTime(utc, SpringFallZone);
+
+        Assert.Equal(wall, back.DateTime);
+    }
+
+    [Fact]
     public void Factory_TryCreate_ValidId_WithNullLabel_UsesDefaultDisplayName()
     {
         var factory = new ClockZoneFactory(CreateResolver());

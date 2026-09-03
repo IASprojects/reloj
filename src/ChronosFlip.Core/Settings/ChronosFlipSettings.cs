@@ -1,3 +1,4 @@
+using ChronosFlip.Core.Alarms;
 using ChronosFlip.Core.WorldClock;
 
 namespace ChronosFlip.Core.Settings;
@@ -16,6 +17,9 @@ public sealed class ChronosFlipSettings
 
     /// <summary>Persisted world-clock zones (local card never included).</summary>
     public List<ClockZoneRef>? Zones { get; set; }
+
+    /// <summary>Persisted alarms (FR-23): absolute instants survive restart.</summary>
+    public List<AlarmRef>? Alarms { get; set; }
 }
 
 public sealed class WindowBounds

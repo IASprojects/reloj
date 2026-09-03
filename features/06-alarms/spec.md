@@ -1,6 +1,6 @@
 # Alarms
 
-- **Status:** `Planned`
+- **Status:** `Done`
 - **Requirements:** FR-20, FR-21, FR-22, FR-23 (+ FR-24 P2)
 - **Depends on:** 02 (clock/monotonic tick), 03 (persistence), 04 (per-zone)
 - **Stage:** 5

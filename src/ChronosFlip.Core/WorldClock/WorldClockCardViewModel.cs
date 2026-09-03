@@ -1,3 +1,4 @@
+using System.Windows.Input;
 using ChronosFlip.Core.Clocks;
 using CommunityToolkit.Mvvm.ComponentModel;
 
@@ -22,6 +23,20 @@ public partial class WorldClockCardViewModel : ObservableObject
     [NotifyPropertyChangedFor(nameof(TimeHMS))]
     [NotifyPropertyChangedFor(nameof(DateText))]
     private DateTimeOffset _now = DateTimeOffset.MinValue;
+
+    /// <summary>True when this zone has an armed (enabled, future) alarm (FR-21).</summary>
+    [ObservableProperty]
+    private bool _hasAlarm;
+
+    /// <summary>True while this zone's alarm is ringing (FR-22).</summary>
+    [ObservableProperty]
+    private bool _isAlarmRinging;
+
+    /// <summary>
+    /// Stop action surfaced from the card's ringing affordance. Assigned by the
+    /// shell to route to the owning <see cref="Alarms.AlarmViewModel"/>.
+    /// </summary>
+    public ICommand? DismissAlarmCommand { get; set; }
 
     public WorldClockCardViewModel(string label, string timeZoneId, TimeZoneInfo zone)
     {

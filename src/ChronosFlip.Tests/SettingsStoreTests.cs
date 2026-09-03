@@ -1,3 +1,4 @@
+using ChronosFlip.Core.Alarms;
 using ChronosFlip.Core.Settings;
 using ChronosFlip.Core.WorldClock;
 
@@ -206,5 +207,89 @@ public sealed class SettingsStoreTests : IDisposable
         Assert.NotNull(loaded.Zones);
         Assert.Single(loaded.Zones);
         Assert.Equal("A", loaded.Zones[0].Label);
+    }
+
+    [Fact]
+    public void Save_Then_Load_RoundTripsAlarms()
+    {
+        var store = new SettingsStore(_directory);
+        var input = new ChronosFlipSettings();
+        input.Alarms = new List<AlarmRef>
+        {
+            AlarmRef.FromAlarm(Alarm.Restore("a1", "Tokyo Standard Time",
+                new DateTimeOffset(2026, 9, 12, 2, 30, 0, TimeSpan.Zero), "Tokyo")),
+            AlarmRef.FromAlarm(Alarm.Restore("a2", "Paris",
+                new DateTimeOffset(2026, 9, 13, 7, 0, 0, TimeSpan.Zero))),
+        };
+        input.Alarms[1].IsEnabled = false;
+
+        store.Save(input);
+        var loaded = store.Load();
+
+        Assert.NotNull(loaded.Alarms);
+        Assert.Equal(2, loaded.Alarms!.Count);
+        Assert.Equal("a1", loaded.Alarms[0].Id);
+        Assert.Equal("Tokyo Standard Time", loaded.Alarms[0].ZoneId);
+        Assert.True(loaded.Alarms[0].IsEnabled);
+        Assert.False(loaded.Alarms[1].IsEnabled);
+        Assert.StartsWith("2026-09-12", loaded.Alarms[0].FireAtUtc!, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void Load_NormalizesMissingAlarms_ToEmptyList()
+    {
+        var store = new SettingsStore(_directory);
+        Directory.CreateDirectory(_directory);
+        File.WriteAllText(store.FilePath, "{\"NeonEnabled\":true}");
+
+        var loaded = store.Load();
+
+        Assert.NotNull(loaded.Alarms);
+        Assert.Empty(loaded.Alarms!);
+    }
+
+    [Fact]
+    public void Load_DeduplicatesAlarms_ById()
+    {
+        var store = new SettingsStore(_directory);
+        Directory.CreateDirectory(_directory);
+        File.WriteAllText(store.FilePath, """
+        {
+          "Alarms": [
+            { "Id": "a1", "ZoneId": "Tokyo Standard Time", "FireAtUtc": "2026-09-12T02:30:00Z", "IsEnabled": true },
+            { "Id": "a1", "ZoneId": "Paris", "FireAtUtc": "2026-09-13T07:00:00Z", "IsEnabled": true },
+            { "Id": "", "ZoneId": "Paris", "FireAtUtc": "2026-09-13T07:00:00Z", "IsEnabled": true },
+            { "Id": "a3", "ZoneId": "Paris", "FireAtUtc": "not-a-date", "IsEnabled": true },
+            { "Id": "a4", "ZoneId": "  ", "FireAtUtc": "2026-09-13T07:00:00Z", "IsEnabled": true }
+          ]
+        }
+        """);
+
+        var loaded = store.Load();
+
+        Assert.NotNull(loaded.Alarms);
+        Assert.Single(loaded.Alarms!);
+        Assert.Equal("a1", loaded.Alarms[0].Id);
+        Assert.Equal("Tokyo Standard Time", loaded.Alarms[0].ZoneId);
+    }
+
+    [Fact]
+    public void Load_DeduplicatesAlarms_CaseInsensitive()
+    {
+        var store = new SettingsStore(_directory);
+        Directory.CreateDirectory(_directory);
+        File.WriteAllText(store.FilePath, """
+        {
+          "Alarms": [
+            { "Id": "A1", "ZoneId": "Tokyo Standard Time", "FireAtUtc": "2026-09-12T02:30:00Z", "IsEnabled": true },
+            { "Id": "a1", "ZoneId": "Paris", "FireAtUtc": "2026-09-13T07:00:00Z", "IsEnabled": true }
+          ]
+        }
+        """);
+
+        var loaded = store.Load();
+
+        Assert.NotNull(loaded.Alarms);
+        Assert.Single(loaded.Alarms!);
     }
 }

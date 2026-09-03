@@ -1,4 +1,5 @@
 using System.Text.Json;
+using ChronosFlip.Core.Alarms;
 
 namespace ChronosFlip.Core.Settings;
 
@@ -108,6 +109,15 @@ public sealed class SettingsStore
                            !string.IsNullOrWhiteSpace(zone.TimeZoneId) &&
                            !string.IsNullOrWhiteSpace(zone.Label))
             .GroupBy(zone => zone.TimeZoneId!, StringComparer.OrdinalIgnoreCase)
+            .Select(group => group.First())
+            .ToList() ?? [];
+
+        settings.Alarms = settings.Alarms?
+            .Where(alarm => alarm is not null &&
+                            !string.IsNullOrWhiteSpace(alarm.Id) &&
+                            !string.IsNullOrWhiteSpace(alarm.ZoneId) &&
+                            DateTimeOffset.TryParse(alarm.FireAtUtc, out _))
+            .GroupBy(alarm => alarm!.Id!, StringComparer.OrdinalIgnoreCase)
             .Select(group => group.First())
             .ToList() ?? [];
 

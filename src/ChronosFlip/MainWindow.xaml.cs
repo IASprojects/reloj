@@ -2,12 +2,14 @@ using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.ComponentModel;
 using System.Runtime.InteropServices;
+using ChronosFlip.Core.Alarms;
 using ChronosFlip.Core.Clocks;
 using ChronosFlip.Core.Settings;
 using ChronosFlip.Core.ViewModels;
 using ChronosFlip.Core.WindowModes;
 using ChronosFlip.Core.WorldClock;
 using ChronosFlip.Services;
+using CommunityToolkit.Mvvm.Input;
 using Microsoft.UI.Input;
 using Microsoft.UI.Windowing;
 using Microsoft.UI.Xaml;
@@ -29,6 +31,7 @@ public sealed partial class MainWindow : Window
     private readonly ZonePickerViewModel _zonePicker;
     private readonly IntPtr _hwnd;
     private readonly WinUIWindowModeService _windowModeService;
+    private readonly AlarmChime _alarmChime = new();
 
     public MainWindow()
     {
@@ -45,13 +48,22 @@ public sealed partial class MainWindow : Window
 
         var ticker = new ClockTicker(new SystemClock());
 
-        WorldClock = new WorldClockViewModel(new SystemZoneResolver(), ViewModel.Zones);
+        var zoneResolver = new SystemZoneResolver();
+        WorldClock = new WorldClockViewModel(zoneResolver, ViewModel.Zones);
         WorldClock.Cards.CollectionChanged += OnCardsChanged;
         WorldClock.Attach(ticker);
         RefreshOtherCards();
 
-        _zonePicker = new ZonePickerViewModel(new ClockZoneFactory(new SystemZoneResolver()));
+        _zonePicker = new ZonePickerViewModel(new ClockZoneFactory(zoneResolver));
         _zonePicker.Reset(WorldClock.Cards.Select(card => card.TimeZoneId));
+
+        Alarms = new AlarmViewModel(
+            new AlarmService(ViewModel.Alarms.Select(alarm => alarm.ToAlarm()).Where(alarm => alarm is not null).Cast<Alarm>()),
+            zoneId => zoneResolver.Resolve(zoneId));
+        Alarms.AlarmRang += OnAlarmRang;
+        Alarms.Changed += OnAlarmsChanged;
+        ticker.Tick += (_, now) => Alarms.Evaluate(now);
+        RefreshCardAlarmState();
 
         _clock = new ClockService(DispatcherQueue, ticker);
 
@@ -69,6 +81,9 @@ public sealed partial class MainWindow : Window
         ZonePicker.AddRequested += OnZoneAddRequested;
         ZonePicker.RemoveRequested += OnZoneRemoveRequested;
 
+        AlarmPanel.ViewModel = Alarms;
+        AlarmPanel.SetZones(AllZonesForAlarmPicker());
+
         Title = "Chronos Flip";
         RestoreWindowBounds(loaded);
         _windowModeService.SetTopmost(loaded.PinToTop);
@@ -81,6 +96,8 @@ public sealed partial class MainWindow : Window
     public WorldClockViewModel WorldClock { get; }
 
     public WindowModeViewModel WindowMode { get; }
+
+    public AlarmViewModel Alarms { get; }
 
     /// <summary>Non-local zone cards for the fullscreen bottom strip.</summary>
     public ObservableCollection<WorldClockCardViewModel> OtherCards { get; } = new();
@@ -244,6 +261,7 @@ public sealed partial class MainWindow : Window
     {
         SettingsPanel.CancelPendingSave();
         SaveWindowBounds();
+        _alarmChime.Dispose();
         _clock.Dispose();
     }
 
@@ -255,6 +273,7 @@ public sealed partial class MainWindow : Window
     private void OnZoneRemoveRequested(object? sender, string zoneId)
     {
         WorldClock.RemoveZone(zoneId);
+        Alarms.RemoveAlarmsForZone(zoneId);
     }
 
     private void OnCardsChanged(object? sender, NotifyCollectionChangedEventArgs e)
@@ -263,6 +282,8 @@ public sealed partial class MainWindow : Window
         _zonePicker.Reset(WorldClock.Cards.Select(card => card.TimeZoneId));
         ViewModel.SetZones(WorldClock.ZonesToPersist());
         ViewModel.Save();
+        RefreshCardAlarmState();
+        AlarmPanel.SetZones(AllZonesForAlarmPicker());
     }
 
     private void RefreshOtherCards()
@@ -272,6 +293,49 @@ public sealed partial class MainWindow : Window
         {
             OtherCards.Add(card);
         }
+    }
+
+    private void OnAlarmRang(object? sender, Alarm alarm)
+    {
+        _alarmChime.Start();
+        RefreshCardAlarmState();
+    }
+
+    private void OnAlarmsChanged(object? sender, EventArgs e)
+    {
+        RefreshCardAlarmState();
+        ViewModel.SetAlarms(Alarms.Alarms.Select(AlarmRef.FromAlarm));
+        ViewModel.Save();
+
+        if (Alarms.RingingCount == 0)
+        {
+            _alarmChime.Stop();
+        }
+    }
+
+    /// <summary>Refreshes per-card alarm badge + ringing state (FR-21/22).</summary>
+    private void RefreshCardAlarmState()
+    {
+        foreach (var card in WorldClock.Cards)
+        {
+            var badge = Alarms.BadgeFor(card.TimeZoneId);
+            card.HasAlarm = badge != AlarmBadge.None;
+            card.IsAlarmRinging = badge == AlarmBadge.Ringing;
+            card.DismissAlarmCommand = new RelayCommand(() => Alarms.DismissRingingForZone(card.TimeZoneId));
+        }
+    }
+
+    /// <summary>Zone options (local + tray) for the alarm creation row.</summary>
+    private IReadOnlyList<ClockZone> AllZonesForAlarmPicker()
+    {
+        var zones = new List<ClockZone>
+        {
+            new() { Label = WorldClock.LocalCard.Label, TimeZoneId = WorldClock.LocalCard.TimeZoneId },
+        };
+        zones.AddRange(WorldClock.Cards
+            .Where(card => !ReferenceEquals(card, WorldClock.LocalCard))
+            .Select(card => new ClockZone { Label = card.Label, TimeZoneId = card.TimeZoneId }));
+        return zones;
     }
 
     private void OnWindowModePropertyChanged(object? sender, PropertyChangedEventArgs e)
@@ -323,6 +387,11 @@ public sealed partial class MainWindow : Window
     private void OnFullScreenClicked(object sender, RoutedEventArgs e)
     {
         WindowMode.ToggleFullScreen();
+    }
+
+    private void OnSidebarAlarmClicked(object sender, RoutedEventArgs e)
+    {
+        AlarmButton.Flyout.ShowAt(SidebarAlarmButton);
     }
 
     private void OnRootKeyDown(object sender, KeyRoutedEventArgs e)
@@ -393,6 +462,7 @@ public sealed partial class MainWindow : Window
                 NeonHexColor = ViewModel.NeonHexColor,
                 PinToTop = ViewModel.PinToTop,
                 Zones = ViewModel.Zones.Select(ClockZoneRef.FromClockZone).ToList(),
+                Alarms = ViewModel.Alarms.ToList(),
                 Window = new WindowBounds
                 {
                     X = rect.left,

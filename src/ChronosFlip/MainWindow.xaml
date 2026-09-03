@@ -72,7 +72,7 @@
                                         BorderThickness="1"
                                         FontFamily="Segoe Fluent Icons,Segoe MDL2 Assets"
                                         FontSize="12"
-                                        VerticalAlignment="Center"
+VerticalAlignment="Center"
                                         Click="OnFullScreenClicked"
                                         ToolTipService.ToolTip="Fullscreen clock" />
                                 <Button x:Name="AddZoneButton"
@@ -89,6 +89,24 @@
                                     <Button.Flyout>
                                         <Flyout Placement="BottomEdgeAlignedRight">
                                             <views:ZonePickerView x:Name="ZonePicker" />
+                                        </Flyout>
+                                    </Button.Flyout>
+                                </Button>
+                                <Button x:Name="AlarmButton"
+                                        Margin="6,0,0,0"
+                                        Width="30"
+                                        Height="30"
+                                        Padding="0"
+                                        Content="&#xE916;"
+                                        Background="Transparent"
+                                        BorderBrush="{StaticResource CardBorderBrush}"
+                                        BorderThickness="1"
+                                        FontFamily="Segoe Fluent Icons,Segoe MDL2 Assets"
+                                        FontSize="12"
+                                        ToolTipService.ToolTip="Alarms">
+                                    <Button.Flyout>
+                                        <Flyout Placement="BottomEdgeAlignedRight">
+                                            <views:AlarmView x:Name="AlarmPanel" />
                                         </Flyout>
                                     </Button.Flyout>
                                 </Button>
@@ -187,13 +205,14 @@
                                               FontSize="14"
                                               Foreground="{StaticResource TextOnCardBrush}" />
                                 </Button>
-                                <Button Width="32"
+<Button x:Name="SidebarAlarmButton"
+                                        Width="32"
                                         Height="32"
                                         Padding="0"
                                         Background="Transparent"
                                         BorderBrush="{StaticResource CardBorderBrush}"
                                         BorderThickness="0"
-                                        IsEnabled="False"
+                                        Click="OnSidebarAlarmClicked"
                                         ToolTipService.ToolTip="Alarms">
                                     <FontIcon Glyph="&#xE916;"
                                               FontSize="14"
@@ -227,12 +246,14 @@
                                         <ItemsWrapGrid Orientation="Horizontal"
                                                        MaximumRowsOrColumns="6" />
                                     </ItemsPanelTemplate>
-                                </ItemsControl.ItemsPanel>
+</ItemsControl.ItemsPanel>
                                 <ItemsControl.ItemTemplate>
                                     <DataTemplate>
                                         <controls:WorldClockCardControl Time="{Binding Time}"
                                                                         ZoneLabel="{Binding Label}"
                                                                         Offset="{Binding OffsetText}"
+                                                                        HasAlarm="{Binding HasAlarm}"
+                                                                        IsAlarmRinging="{Binding IsAlarmRinging}"
                                                                         Margin="{StaticResource WorldClockCardGap}" />
                                     </DataTemplate>
                                 </ItemsControl.ItemTemplate>

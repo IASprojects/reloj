@@ -13,4 +13,23 @@ public static class TimeZoneConverter
         var local = TimeZoneInfo.ConvertTimeFromUtc(utc.UtcDateTime, zone);
         return new DateTimeOffset(local, zone.GetUtcOffset(utc));
     }
+
+    /// <summary>
+    /// Converts a zone-local wall time (Kind.Unspecified, e.g. from a picker)
+    /// to the equivalent UTC instant. For single-occurrence alarms the
+    /// ambiguity gap is decided by <see cref="TimeZoneInfo"/>'s own offset
+    /// rules for the local wall time; the result is then normalized to UTC.
+    /// </summary>
+    public static DateTimeOffset FromZoneTime(DateTime localWallTime, TimeZoneInfo zone)
+    {
+        ArgumentNullException.ThrowIfNull(zone);
+        if (localWallTime.Kind != DateTimeKind.Unspecified)
+        {
+            localWallTime = DateTime.SpecifyKind(localWallTime, DateTimeKind.Unspecified);
+        }
+
+        var offset = zone.GetUtcOffset(localWallTime);
+        var dateTimeOffset = new DateTimeOffset(localWallTime, offset);
+        return dateTimeOffset.ToUniversalTime();
+    }
 }

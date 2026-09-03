@@ -8,11 +8,16 @@ using ChronosFlip.Core.ViewModels;
 using ChronosFlip.Core.WindowModes;
 using ChronosFlip.Core.WorldClock;
 using ChronosFlip.Services;
+using Microsoft.UI.Input;
+using Microsoft.UI.Windowing;
 using Microsoft.UI.Xaml;
+using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Input;
 using Microsoft.UI.Xaml.Media;
+using Windows.Foundation;
 using Windows.Graphics;
 using Windows.System;
+using Windows.UI;
 using WinRT.Interop;
 
 namespace ChronosFlip;
@@ -30,6 +35,7 @@ public sealed partial class MainWindow : Window
         InitializeComponent();
 
         _hwnd = WindowNative.GetWindowHandle(this);
+        ConfigureCustomTitleBar();
 
         _settingsStore = new SettingsStore(SettingsStore.DefaultDirectory());
         ViewModel = new SettingsViewModel(_settingsStore);
@@ -78,6 +84,161 @@ public sealed partial class MainWindow : Window
 
     /// <summary>Non-local zone cards for the fullscreen bottom strip.</summary>
     public ObservableCollection<WorldClockCardViewModel> OtherCards { get; } = new();
+
+    private void ConfigureCustomTitleBar()
+    {
+        // Code-only (a XAML setter throws at runtime).
+        ExtendsContentIntoTitleBar = true;
+
+        var titleBar = AppWindow.TitleBar;
+        if (AppWindowTitleBar.IsCustomizationSupported())
+        {
+            // Button backgrounds honor alpha; colors map 1:1 to Nocturne tokens:
+            // 0x2A2A2A = CardSurfaceBrush, 0x3A3A3A = CardBorderBrush, 0xF5F5F5 = TextOnCardBrush.
+            var clear = Color.FromArgb(0, 0, 0, 0);
+            titleBar.ButtonBackgroundColor = clear;
+            titleBar.ButtonInactiveBackgroundColor = clear;
+            titleBar.ButtonHoverBackgroundColor = Color.FromArgb(255, 0x2A, 0x2A, 0x2A);
+            titleBar.ButtonPressedBackgroundColor = Color.FromArgb(255, 0x3A, 0x3A, 0x3A);
+            titleBar.ButtonForegroundColor = Color.FromArgb(255, 0xF5, 0xF5, 0xF5);
+            titleBar.ButtonHoverForegroundColor = Color.FromArgb(255, 0xF5, 0xF5, 0xF5);
+            titleBar.ButtonInactiveForegroundColor = Color.FromArgb(255, 0x3A, 0x3A, 0x3A);
+
+            // Collapse the native caption strip so the OS buttons disappear entirely;
+            // dragging and button click-through are handled via InputNonClientPointerSource.
+            // Some Windows 10 builds reject Collapsed: keep the default chrome there.
+            try
+            {
+                titleBar.PreferredHeightOption = TitleBarHeightOption.Collapsed;
+            }
+            catch
+            {
+            }
+        }
+
+        AppWindow.Changed += OnAppWindowChanged;
+        HeaderHost.Loaded += (_, _) =>
+        {
+            if (HeaderHost.XamlRoot is not null)
+            {
+                HeaderHost.XamlRoot.Changed += (_, _) => UpdateTitleBarRegions();
+            }
+            UpdateTitleBarRegions();
+        };
+        HeaderHost.SizeChanged += (_, _) => UpdateTitleBarRegions();
+        UpdateMaxRestoreGlyph(AppWindow.Presenter as OverlappedPresenter);
+    }
+
+    private void UpdateTitleBarRegions()
+    {
+        if (!ExtendsContentIntoTitleBar || (WindowMode?.IsFullScreen ?? true))
+        {
+            return;
+        }
+
+        if (HeaderHost.ActualWidth <= 0 || HeaderHost.ActualHeight <= 0)
+        {
+            return;
+        }
+
+        var scale = HeaderHost.XamlRoot?.RasterizationScale ?? 1.0;
+
+        try
+        {
+            HeaderRightPad.Width = new GridLength(AppWindow.TitleBar.RightInset / scale);
+        }
+        catch
+        {
+        }
+        try
+        {
+            HeaderLeftPad.Width = new GridLength(AppWindow.TitleBar.LeftInset / scale);
+        }
+        catch
+        {
+        }
+
+        var source = InputNonClientPointerSource.GetForWindowId(AppWindow.Id);
+
+#pragma warning disable CS0612, CS0618
+        var drag = ToPhysicalRect(HeaderHost, scale);
+        if (drag.Width > 0 && drag.Height > 0)
+        {
+            AppWindow.TitleBar.SetDragRectangles([drag]);
+        }
+#pragma warning restore CS0612, CS0618
+
+        var passthrough = new List<RectInt32>();
+        AddPassthrough(HeaderTools, scale, passthrough);
+        AddPassthrough(CaptionButtons, scale, passthrough);
+        source.SetRegionRects(NonClientRegionKind.Passthrough, passthrough.ToArray());
+    }
+
+    private static RectInt32 ToPhysicalRect(FrameworkElement element, double scale)
+    {
+        var bounds = element.TransformToVisual(null)
+            .TransformBounds(new Rect(0, 0, element.ActualWidth, element.ActualHeight));
+        return new RectInt32(
+            (int)Math.Round(bounds.X * scale),
+            (int)Math.Round(bounds.Y * scale),
+            (int)Math.Round(bounds.Width * scale),
+            (int)Math.Round(bounds.Height * scale));
+    }
+
+    private void AddPassthrough(FrameworkElement element, double scale, List<RectInt32> results)
+    {
+        if (element.ActualWidth <= 0 || element.ActualHeight <= 0)
+        {
+            return;
+        }
+
+        results.Add(ToPhysicalRect(element, scale));
+    }
+
+    private void OnAppWindowChanged(AppWindow sender, AppWindowChangedEventArgs e)
+    {
+        if (e.DidPresenterChange)
+        {
+            UpdateMaxRestoreGlyph(sender.Presenter as OverlappedPresenter);
+        }
+    }
+
+    private void UpdateMaxRestoreGlyph(OverlappedPresenter? presenter)
+    {
+        if (presenter is null)
+        {
+            return;
+        }
+
+        var maximized = presenter.State == OverlappedPresenterState.Maximized;
+        MaxRestoreIcon.Glyph = maximized ? "\uE924" : "\uE923";
+        ToolTipService.SetToolTip(MaximizeRestoreButton, maximized ? "Restore" : "Maximize");
+    }
+
+    private void OnMinimizeClicked(object sender, RoutedEventArgs e)
+    {
+        (AppWindow.Presenter as OverlappedPresenter)?.Minimize();
+    }
+
+    private void OnMaxRestoreClicked(object sender, RoutedEventArgs e)
+    {
+        var presenter = AppWindow.Presenter as OverlappedPresenter;
+        if (presenter is null)
+        {
+            return;
+        }
+
+        if (presenter.State == OverlappedPresenterState.Maximized)
+        {
+            presenter.Restore();
+        }
+        else
+        {
+            presenter.Maximize();
+        }
+    }
+
+    private void OnCloseClicked(object sender, RoutedEventArgs e) => Close();
 
     private void OnClosed(object sender, WindowEventArgs args)
     {
@@ -137,6 +298,26 @@ public sealed partial class MainWindow : Window
     {
         NeonShell.Visibility = fullScreen ? Visibility.Collapsed : Visibility.Visible;
         NeonShellFullScreen.Visibility = fullScreen ? Visibility.Visible : Visibility.Collapsed;
+
+        var source = InputNonClientPointerSource.GetForWindowId(AppWindow.Id);
+        if (fullScreen)
+        {
+            // Drop drag + passthrough so the exit button stays clickable (no stale caption strip).
+            source.SetRegionRects(NonClientRegionKind.Passthrough, []);
+#pragma warning disable CS0612, CS0618
+            try
+            {
+                AppWindow.TitleBar.SetDragRectangles([]);
+            }
+            catch
+            {
+            }
+#pragma warning restore CS0612, CS0618
+            return;
+        }
+
+        UpdateTitleBarRegions();
+        UpdateMaxRestoreGlyph(AppWindow.Presenter as OverlappedPresenter);
     }
 
     private void OnFullScreenClicked(object sender, RoutedEventArgs e)
@@ -199,11 +380,13 @@ public sealed partial class MainWindow : Window
 
         try
         {
-            if (!GetWindowRect(_hwnd, out var rect))
+            var placement = new WINDOWPLACEMENT { length = Marshal.SizeOf<WINDOWPLACEMENT>() };
+            if (!GetWindowPlacement(_hwnd, ref placement))
             {
                 return;
             }
 
+            var rect = placement.rcNormalPosition;
             var settings = new ChronosFlipSettings
             {
                 NeonEnabled = ViewModel.NeonEnabled,
@@ -225,9 +408,27 @@ public sealed partial class MainWindow : Window
         }
     }
 
-    [DllImport("user32.dll")]
+    [DllImport("user32.dll", SetLastError = true)]
     [return: MarshalAs(UnmanagedType.Bool)]
-    private static extern bool GetWindowRect(IntPtr hWnd, out RECT lpRect);
+    private static extern bool GetWindowPlacement(IntPtr hWnd, ref WINDOWPLACEMENT lpwndpl);
+
+    [StructLayout(LayoutKind.Sequential)]
+    private struct WINDOWPLACEMENT
+    {
+        public int length;
+        public int flags;
+        public int showCmd;
+        public POINT ptMinPosition;
+        public POINT ptMaxPosition;
+        public RECT rcNormalPosition;
+    }
+
+    [StructLayout(LayoutKind.Sequential)]
+    private struct POINT
+    {
+        public int X;
+        public int Y;
+    }
 
     [StructLayout(LayoutKind.Sequential)]
     private struct RECT

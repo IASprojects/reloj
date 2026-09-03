@@ -31,6 +31,9 @@
     <x:Double x:Key="WorldClockCardHeight">96</x:Double>
     <Thickness x:Key="WorldClockCardGap">6</Thickness>
 
+    <!-- Shell layout -->
+    <GridLength x:Key="SidebarWidth">48</GridLength>
+
     <!-- Typography -->
     <FontFamily x:Key="SpaceMonoFont">ms-appx:///Assets/Fonts/SpaceMono-Bold.ttf#Space Mono</FontFamily>
     <FontFamily x:Key="JetBrainsMonoFont">ms-appx:///Assets/Fonts/JetBrainsMono-SemiBold.ttf#JetBrains Mono</FontFamily>

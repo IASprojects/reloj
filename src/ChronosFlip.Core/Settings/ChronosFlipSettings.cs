@@ -34,6 +34,6 @@ public static class SettingsVersions
 public static class SettingsDefaults
 {
     public const string NeonHexColor = "#00E5FF";
-    public const int WindowWidth = 672;
+    public const int WindowWidth = 720;
     public const int WindowHeight = 340;
 }

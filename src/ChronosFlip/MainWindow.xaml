@@ -12,102 +12,233 @@
         <controls:NeonGlowBorder x:Name="NeonShell"
                                  IsNeonEnabled="{x:Bind ViewModel.NeonEnabled, Mode=OneWay}">
             <controls:NeonGlowBorder.InnerContent>
-                <Grid RowSpacing="18" Padding="8">
+                <Grid>
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto" />
-                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
                     </Grid.RowDefinitions>
 
-                    <StackPanel Grid.Row="0"
-                                Orientation="Horizontal"
-                                HorizontalAlignment="Stretch">
-                        <TextBlock Text="WORLD CLOCK"
-                                   Foreground="{StaticResource LabelTextBrush}"
-                                   FontFamily="{StaticResource JetBrainsMonoFont}"
-                                   FontSize="11"
-                                   FontWeight="SemiBold"
-                                   CharacterSpacing="140"
-                                   VerticalAlignment="Center" />
-                        <ToggleButton x:Name="PinToggleButton"
-                                      Margin="8,0,0,0"
-                                      Width="30"
-                                      Height="30"
-                                      Padding="0"
-                                      Content="&#xE7C1;"
-                                      IsChecked="{x:Bind WindowMode.IsPinActive, Mode=TwoWay}"
-                                      Background="Transparent"
-                                      BorderBrush="{StaticResource CardBorderBrush}"
-                                      BorderThickness="1"
-                                      FontFamily="Segoe Fluent Icons,Segoe MDL2 Assets"
-                                      FontSize="12"
-                                      VerticalAlignment="Center"
-                                      ToolTipService.ToolTip="Pin always on top" />
-                        <Button x:Name="FullScreenButton"
-                                Margin="6,0,0,0"
-                                Width="30"
-                                Height="30"
-                                Padding="0"
-                                Content="&#xE740;"
-                                Background="Transparent"
-                                BorderBrush="{StaticResource CardBorderBrush}"
-                                BorderThickness="1"
-                                FontFamily="Segoe Fluent Icons,Segoe MDL2 Assets"
-                                FontSize="12"
-                                VerticalAlignment="Center"
-                                Click="OnFullScreenClicked"
-                                ToolTipService.ToolTip="Fullscreen clock" />
-                        <Button x:Name="AddZoneButton"
-                                Margin="8,0,0,0"
-                                Width="30"
-                                Height="30"
-                                Padding="0"
-                                Content="&#xE710;"
-                                Background="Transparent"
-                                BorderBrush="{StaticResource CardBorderBrush}"
-                                BorderThickness="1"
-                                FontFamily="Segoe Fluent Icons,Segoe MDL2 Assets"
-                                FontSize="12">
-                            <Button.Flyout>
-                                <Flyout Placement="BottomEdgeAlignedRight">
-                                    <views:ZonePickerView x:Name="ZonePicker" />
-                                </Flyout>
-                            </Button.Flyout>
-                        </Button>
-                        <Button x:Name="SettingsButton"
-                                Margin="6,0,0,0"
-                                Width="30"
-                                Height="30"
-                                Padding="0"
-                                Background="Transparent"
-                                BorderBrush="{StaticResource CardBorderBrush}"
-                                BorderThickness="1"
-                                Content="&#xE713;"
-                                FontFamily="Segoe Fluent Icons,Segoe MDL2 Assets"
-                                FontSize="14">
-                            <Button.Flyout>
-                                <Flyout Placement="BottomEdgeAlignedRight">
-                                    <views:SettingsView x:Name="SettingsPanel" />
-                                </Flyout>
-                            </Button.Flyout>
-                        </Button>
-                    </StackPanel>
+                    <!-- Custom title bar strip (drag region + caption controls) -->
+                    <Grid x:Name="HeaderHost"
+                          Grid.Row="0"
+                          Height="48"
+                          Background="Transparent">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition x:Name="HeaderLeftPad" Width="0" />
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition x:Name="HeaderRightPad" Width="0" />
+                        </Grid.ColumnDefinitions>
 
-                    <ItemsControl Grid.Row="1" ItemsSource="{Binding Cards}">
-                        <ItemsControl.ItemsPanel>
-                            <ItemsPanelTemplate>
-                                <ItemsWrapGrid Orientation="Horizontal"
-                                               MaximumRowsOrColumns="6" />
-                            </ItemsPanelTemplate>
-                        </ItemsControl.ItemsPanel>
-                        <ItemsControl.ItemTemplate>
-                            <DataTemplate>
-                                <controls:WorldClockCardControl Time="{Binding Time}"
-                                                                ZoneLabel="{Binding Label}"
-                                                                Offset="{Binding OffsetText}"
-                                                                Margin="{StaticResource WorldClockCardGap}" />
-                            </DataTemplate>
-                        </ItemsControl.ItemTemplate>
-                    </ItemsControl>
+                        <Grid Grid.Column="1">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+
+                            <StackPanel x:Name="HeaderTools"
+                                        Grid.Column="0"
+                                        Orientation="Horizontal"
+                                        VerticalAlignment="Center">
+                                <TextBlock Text="WORLD CLOCK"
+                                           Foreground="{StaticResource LabelTextBrush}"
+                                           FontFamily="{StaticResource JetBrainsMonoFont}"
+                                           FontSize="11"
+                                           FontWeight="SemiBold"
+                                           CharacterSpacing="140"
+                                           VerticalAlignment="Center" />
+                                <ToggleButton x:Name="PinToggleButton"
+                                              Margin="8,0,0,0"
+                                              Width="30"
+                                              Height="30"
+                                              Padding="0"
+                                              Content="&#xE7C1;"
+                                              IsChecked="{x:Bind WindowMode.IsPinActive, Mode=TwoWay}"
+                                              Background="Transparent"
+                                              BorderBrush="{StaticResource CardBorderBrush}"
+                                              BorderThickness="1"
+                                              FontFamily="Segoe Fluent Icons,Segoe MDL2 Assets"
+                                              FontSize="12"
+                                              VerticalAlignment="Center"
+                                              ToolTipService.ToolTip="Pin always on top" />
+                                <Button x:Name="FullScreenButton"
+                                        Margin="6,0,0,0"
+                                        Width="30"
+                                        Height="30"
+                                        Padding="0"
+                                        Content="&#xE740;"
+                                        Background="Transparent"
+                                        BorderBrush="{StaticResource CardBorderBrush}"
+                                        BorderThickness="1"
+                                        FontFamily="Segoe Fluent Icons,Segoe MDL2 Assets"
+                                        FontSize="12"
+                                        VerticalAlignment="Center"
+                                        Click="OnFullScreenClicked"
+                                        ToolTipService.ToolTip="Fullscreen clock" />
+                                <Button x:Name="AddZoneButton"
+                                        Margin="8,0,0,0"
+                                        Width="30"
+                                        Height="30"
+                                        Padding="0"
+                                        Content="&#xE710;"
+                                        Background="Transparent"
+                                        BorderBrush="{StaticResource CardBorderBrush}"
+                                        BorderThickness="1"
+                                        FontFamily="Segoe Fluent Icons,Segoe MDL2 Assets"
+                                        FontSize="12">
+                                    <Button.Flyout>
+                                        <Flyout Placement="BottomEdgeAlignedRight">
+                                            <views:ZonePickerView x:Name="ZonePicker" />
+                                        </Flyout>
+                                    </Button.Flyout>
+                                </Button>
+                                <Button x:Name="SettingsButton"
+                                        Margin="6,0,0,0"
+                                        Width="30"
+                                        Height="30"
+                                        Padding="0"
+                                        Background="Transparent"
+                                        BorderBrush="{StaticResource CardBorderBrush}"
+                                        BorderThickness="1"
+                                        Content="&#xE713;"
+                                        FontFamily="Segoe Fluent Icons,Segoe MDL2 Assets"
+                                        FontSize="14">
+                                    <Button.Flyout>
+                                        <Flyout Placement="BottomEdgeAlignedRight">
+                                            <views:SettingsView x:Name="SettingsPanel" />
+                                        </Flyout>
+                                    </Button.Flyout>
+                                </Button>
+                            </StackPanel>
+
+                            <StackPanel x:Name="CaptionButtons"
+                                        Grid.Column="2"
+                                        Orientation="Horizontal"
+                                        VerticalAlignment="Center">
+                                <Button x:Name="MinimizeButton"
+                                        Width="30"
+                                        Height="30"
+                                        Padding="0"
+                                        Background="Transparent"
+                                        BorderBrush="{StaticResource CardBorderBrush}"
+                                        BorderThickness="1"
+                                        Click="OnMinimizeClicked"
+                                        ToolTipService.ToolTip="Minimize">
+                                    <FontIcon Glyph="&#xE921;"
+                                              FontSize="12"
+                                              Foreground="{StaticResource TextOnCardBrush}" />
+                                </Button>
+                                <Button x:Name="MaximizeRestoreButton"
+                                        Margin="6,0,0,0"
+                                        Width="30"
+                                        Height="30"
+                                        Padding="0"
+                                        Background="Transparent"
+                                        BorderBrush="{StaticResource CardBorderBrush}"
+                                        BorderThickness="1"
+                                        Click="OnMaxRestoreClicked"
+                                        ToolTipService.ToolTip="Maximize">
+                                    <FontIcon x:Name="MaxRestoreIcon"
+                                              Glyph="&#xE923;"
+                                              FontSize="12"
+                                              Foreground="{StaticResource TextOnCardBrush}" />
+                                </Button>
+                                <Button x:Name="CloseButton"
+                                        Margin="6,0,0,0"
+                                        Width="30"
+                                        Height="30"
+                                        Padding="0"
+                                        Background="Transparent"
+                                        BorderBrush="{StaticResource CardBorderBrush}"
+                                        BorderThickness="1"
+                                        Click="OnCloseClicked"
+                                        ToolTipService.ToolTip="Close">
+                                    <FontIcon Glyph="&#xE8BB;"
+                                              FontSize="12"
+                                              Foreground="{StaticResource TextOnCardBrush}" />
+                                </Button>
+                            </StackPanel>
+                        </Grid>
+                    </Grid>
+
+                    <!-- Body: side nav rail + tray -->
+                    <Grid Grid.Row="1">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="{StaticResource SidebarWidth}" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+
+                        <Grid Grid.Column="0"
+                              Background="{StaticResource CardSurfaceBrush}"
+                              BorderBrush="{StaticResource CardBorderBrush}"
+                              BorderThickness="0,0,1,0">
+                            <StackPanel Spacing="8"
+                                        Padding="0,12,0,12"
+                                        HorizontalAlignment="Center">
+                                <Button Width="32"
+                                        Height="32"
+                                        Padding="0"
+                                        Background="Transparent"
+                                        BorderBrush="{StaticResource CardBorderBrush}"
+                                        BorderThickness="0"
+                                        IsEnabled="False"
+                                        ToolTipService.ToolTip="World Clock">
+                                    <FontIcon Glyph="&#xE909;"
+                                              FontSize="14"
+                                              Foreground="{StaticResource TextOnCardBrush}" />
+                                </Button>
+                                <Button Width="32"
+                                        Height="32"
+                                        Padding="0"
+                                        Background="Transparent"
+                                        BorderBrush="{StaticResource CardBorderBrush}"
+                                        BorderThickness="0"
+                                        IsEnabled="False"
+                                        ToolTipService.ToolTip="Alarms">
+                                    <FontIcon Glyph="&#xE916;"
+                                              FontSize="14"
+                                              Foreground="{StaticResource TextOnCardBrush}" />
+                                </Button>
+                                <Button Width="32"
+                                        Height="32"
+                                        Padding="0"
+                                        Background="Transparent"
+                                        BorderBrush="{StaticResource CardBorderBrush}"
+                                        BorderThickness="0"
+                                        IsEnabled="False"
+                                        ToolTipService.ToolTip="Timer">
+                                    <FontIcon Glyph="&#xE917;"
+                                              FontSize="14"
+                                              Foreground="{StaticResource TextOnCardBrush}" />
+                                </Button>
+                                <Border Height="1"
+                                        Margin="8,4"
+                                        Background="{StaticResource FlipSplitBrush}" />
+                                <Ellipse Width="6"
+                                         Height="6"
+                                         Fill="{StaticResource NeonAccentBrush}" />
+                            </StackPanel>
+                        </Grid>
+
+                        <Grid Grid.Column="1" Padding="8">
+                            <ItemsControl ItemsSource="{Binding Cards}">
+                                <ItemsControl.ItemsPanel>
+                                    <ItemsPanelTemplate>
+                                        <ItemsWrapGrid Orientation="Horizontal"
+                                                       MaximumRowsOrColumns="6" />
+                                    </ItemsPanelTemplate>
+                                </ItemsControl.ItemsPanel>
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <controls:WorldClockCardControl Time="{Binding Time}"
+                                                                        ZoneLabel="{Binding Label}"
+                                                                        Offset="{Binding OffsetText}"
+                                                                        Margin="{StaticResource WorldClockCardGap}" />
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </Grid>
+                    </Grid>
                 </Grid>
             </controls:NeonGlowBorder.InnerContent>
         </controls:NeonGlowBorder>

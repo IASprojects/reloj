@@ -19,7 +19,7 @@ with a zone picker to add/remove them.
 
 ## Out of scope
 
-- Per-card alarms (see 06), per-card neon (see 08), fullscreen (see 05).
+- Per-card alarms (see 06), per-card neon (see 09), fullscreen (see 05).
 
 > **Note:** the always-on large local flip-clock display (H/M/S cards) is
 > deferred to feature 05 (FR-05 fullscreen), which reintroduces it at

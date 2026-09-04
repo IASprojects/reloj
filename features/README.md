@@ -15,8 +15,9 @@ Status labels:
 | 05 | Window Modes (Topmost/Fullscreen) | FR-40–43, FR-50–52 | `In Progress` |
 | 06 | Alarms | FR-20–23 | `Done` |
 | 07 | Timer | FR-30–33 | `Done` |
-| 08 | Neon Per Card (P2) | FR-64 | `Planned` |
-| 09 | Polish & Hardening | NFR-02/06/07 | `Planned` |
-| 10 | Installer & Publishing | NFR-05 + distribution | `Planned` |
+| 08 | Visual Clock Layout | FR-01, FR-04 (+ NFR-02/04) | `In Progress` |
+| 09 | Neon Per Card (P2) | FR-64 | `Planned` |
+| 10 | Polish & Hardening | NFR-02/06/07 | `Planned` |
+| 11 | Installer & Publishing | NFR-05 + distribution | `Planned` |
 
 Base: `features/01-Planning/PRD.md` (source of truth for FR/NFR). Design: `identyvisual/DEGING.md`. Conventions: `AGENTS.md`.

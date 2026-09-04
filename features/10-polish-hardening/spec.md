@@ -3,7 +3,7 @@
 - **Status:** `Planned`
 - **Requirements:** NFR-01, NFR-02, NFR-06, NFR-07
 - **Depends on:** all feature stages complete
-- **Stage:** 8
+- **Stage:** 9
 
 ## Goal
 

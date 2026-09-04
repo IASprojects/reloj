@@ -2,8 +2,8 @@
 
 - **Status:** `Planned`
 - **Requirements:** NFR-05 (+ release/distribution concern; no dedicated FR in PRD yet)
-- **Depends on:** all feature stages complete (02–09)
-- **Stage:** 9
+- **Depends on:** all feature stages complete (02–10)
+- **Stage:** 10
 
 ## Goal
 

@@ -2,8 +2,9 @@
 
 - **Status:** `Planned`
 - **Requirements:** FR-64
-- **Depends on:** 02 (neon on shell), 03 (per-card color persistence)
-- **Stage:** 7
+- **Depends on:** 02 (neon on shell), 03 (per-card color persistence),
+  08 (shared layout canvas)
+- **Stage:** 8
 
 ## Goal
 

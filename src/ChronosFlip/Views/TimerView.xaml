@@ -30,13 +30,8 @@
         </Style>
     </UserControl.Resources>
 
-    <StackPanel Width="360" Spacing="12">
-        <TextBlock Text="TIMER"
-                   Foreground="{StaticResource TextOnCardBrush}"
-                   FontFamily="{StaticResource SpaceMonoFont}"
-                   FontSize="16"
-                   FontWeight="Bold"
-                   CharacterSpacing="60" />
+    <StackPanel Spacing="12">
+        <ContentControl Style="{StaticResource ViewHeader}" Content="TIMER" />
 
         <StackPanel Orientation="Horizontal" HorizontalAlignment="Center"
                     VerticalAlignment="Center" Spacing="16">

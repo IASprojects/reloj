@@ -4,6 +4,7 @@ using System.ComponentModel;
 using System.Runtime.InteropServices;
 using ChronosFlip.Core.Alarms;
 using ChronosFlip.Core.Clocks;
+using ChronosFlip.Core.Navigation;
 using ChronosFlip.Core.Settings;
 using ChronosFlip.Core.Timers;
 using ChronosFlip.Core.ViewModels;
@@ -111,6 +112,9 @@ public sealed partial class MainWindow : Window
 
     public TimerViewModel Timer { get; }
 
+    /// <summary>Widget-dashboard navigation state (feature 08).</summary>
+    public MainNavigationViewModel Navigation { get; } = new();
+
     /// <summary>Non-local zone cards for the fullscreen bottom strip.</summary>
     public ObservableCollection<WorldClockCardViewModel> OtherCards { get; } = new();
 
@@ -199,7 +203,6 @@ public sealed partial class MainWindow : Window
 
         var passthrough = new List<RectInt32>();
         AddPassthrough(HeaderTools, scale, passthrough);
-        AddPassthrough(CaptionButtons, scale, passthrough);
         source.SetRegionRects(NonClientRegionKind.Passthrough, passthrough.ToArray());
     }
 
@@ -423,16 +426,6 @@ public sealed partial class MainWindow : Window
     private void OnFullScreenClicked(object sender, RoutedEventArgs e)
     {
         WindowMode.ToggleFullScreen();
-    }
-
-    private void OnSidebarAlarmClicked(object sender, RoutedEventArgs e)
-    {
-        AlarmButton.Flyout.ShowAt(SidebarAlarmButton);
-    }
-
-    private void OnSidebarTimerClicked(object sender, RoutedEventArgs e)
-    {
-        TimerButton.Flyout.ShowAt(SidebarTimerButton);
     }
 
     private void OnRootKeyDown(object sender, KeyRoutedEventArgs e)

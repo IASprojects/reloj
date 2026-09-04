@@ -39,6 +39,12 @@
     <!-- Shell layout -->
     <GridLength x:Key="SidebarWidth">48</GridLength>
 
+    <!-- Layout canvas (feature 08): inset from the neon glow zone (12px shell
+         padding), composed of the 4px rhythm units. -->
+    <x:Double x:Key="LayoutGlowInset">8</x:Double>
+    <Thickness x:Key="NavRailInset">8,0,0,0</Thickness>
+    <Thickness x:Key="ContentViewPadding">16,12,16,16</Thickness>
+
     <!-- Typography -->
     <FontFamily x:Key="SpaceMonoFont">ms-appx:///Assets/Fonts/SpaceMono-Bold.ttf#Space Mono</FontFamily>
     <FontFamily x:Key="JetBrainsMonoFont">ms-appx:///Assets/Fonts/JetBrainsMono-SemiBold.ttf#JetBrains Mono</FontFamily>

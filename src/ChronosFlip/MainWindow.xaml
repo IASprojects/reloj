@@ -11,14 +11,16 @@
 
         <controls:NeonGlowBorder x:Name="NeonShell"
                                  IsNeonEnabled="{x:Bind ViewModel.NeonEnabled, Mode=OneWay}">
-            <controls:NeonGlowBorder.InnerContent>
+<controls:NeonGlowBorder.InnerContent>
                 <Grid>
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto" />
                         <RowDefinition Height="*" />
                     </Grid.RowDefinitions>
 
-                    <!-- Custom title bar strip (drag region + caption controls) -->
+                    <!-- Custom title bar strip (drag region + tool buttons). The
+                         per-view title moves into each view's ViewHeader; the window
+                         controls live in the content region's top-right overlay. -->
                     <Grid x:Name="HeaderHost"
                           Grid.Row="0"
                           Height="48"
@@ -29,38 +31,24 @@
                             <ColumnDefinition x:Name="HeaderRightPad" Width="0" />
                         </Grid.ColumnDefinitions>
 
-                        <Grid Grid.Column="1">
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="Auto" />
-                                <ColumnDefinition Width="*" />
-                                <ColumnDefinition Width="Auto" />
-                            </Grid.ColumnDefinitions>
-
-                            <StackPanel x:Name="HeaderTools"
-                                        Grid.Column="0"
-                                        Orientation="Horizontal"
-                                        VerticalAlignment="Center">
-                                <TextBlock Text="WORLD CLOCK"
-                                           Foreground="{StaticResource LabelTextBrush}"
-                                           FontFamily="{StaticResource JetBrainsMonoFont}"
-                                           FontSize="11"
-                                           FontWeight="SemiBold"
-                                           CharacterSpacing="140"
-                                           VerticalAlignment="Center" />
-                                <ToggleButton x:Name="PinToggleButton"
-                                              Margin="8,0,0,0"
-                                              Width="30"
-                                              Height="30"
-                                              Padding="0"
-                                              Content="&#xE7C1;"
-                                              IsChecked="{x:Bind WindowMode.IsPinActive, Mode=TwoWay}"
-                                              Background="Transparent"
-                                              BorderBrush="{StaticResource CardBorderBrush}"
-                                              BorderThickness="1"
-                                              FontFamily="Segoe Fluent Icons,Segoe MDL2 Assets"
-                                              FontSize="12"
-                                              VerticalAlignment="Center"
-                                              ToolTipService.ToolTip="Pin always on top" />
+                        <StackPanel x:Name="HeaderTools"
+                                    Grid.Column="1"
+                                    Orientation="Horizontal"
+                                    VerticalAlignment="Center">
+                            <ToggleButton x:Name="PinToggleButton"
+                                          Margin="0,0,0,0"
+                                          Width="30"
+                                          Height="30"
+                                          Padding="0"
+                                          Content="&#xE7C1;"
+                                          IsChecked="{x:Bind WindowMode.IsPinActive, Mode=TwoWay}"
+                                          Background="Transparent"
+                                          BorderBrush="{StaticResource CardBorderBrush}"
+                                          BorderThickness="1"
+                                          FontFamily="Segoe Fluent Icons,Segoe MDL2 Assets"
+                                          FontSize="12"
+                                          VerticalAlignment="Center"
+                                          ToolTipService.ToolTip="Pin always on top" />
                                 <Button x:Name="FullScreenButton"
                                         Margin="6,0,0,0"
                                         Width="30"
@@ -92,42 +80,6 @@ VerticalAlignment="Center"
                                         </Flyout>
                                     </Button.Flyout>
                                 </Button>
-                                <Button x:Name="AlarmButton"
-                                        Margin="6,0,0,0"
-                                        Width="30"
-                                        Height="30"
-                                        Padding="0"
-                                        Content="&#xE916;"
-                                        Background="Transparent"
-                                        BorderBrush="{StaticResource CardBorderBrush}"
-                                        BorderThickness="1"
-                                        FontFamily="Segoe Fluent Icons,Segoe MDL2 Assets"
-                                        FontSize="12"
-                                        ToolTipService.ToolTip="Alarms">
-                                    <Button.Flyout>
-                                        <Flyout Placement="BottomEdgeAlignedRight">
-                                            <views:AlarmView x:Name="AlarmPanel" />
-                                        </Flyout>
-                                    </Button.Flyout>
-                                </Button>
-                                <Button x:Name="TimerButton"
-                                        Margin="6,0,0,0"
-                                        Width="30"
-                                        Height="30"
-                                        Padding="0"
-                                        Content="&#xE917;"
-                                        Background="Transparent"
-                                        BorderBrush="{StaticResource CardBorderBrush}"
-                                        BorderThickness="1"
-                                        FontFamily="Segoe Fluent Icons,Segoe MDL2 Assets"
-                                        FontSize="12"
-                                        ToolTipService.ToolTip="Timer">
-                                    <Button.Flyout>
-                                        <Flyout Placement="BottomEdgeAlignedRight">
-                                            <views:TimerView x:Name="TimerPanel" />
-                                        </Flyout>
-                                    </Button.Flyout>
-                                </Button>
                                 <Button x:Name="SettingsButton"
                                         Margin="6,0,0,0"
                                         Width="30"
@@ -146,11 +98,116 @@ VerticalAlignment="Center"
                                     </Button.Flyout>
                                 </Button>
                             </StackPanel>
+                        </Grid>
 
+                    <!-- Body: nav rail + shared content region -->
+                    <Grid Grid.Row="1">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="{StaticResource SidebarWidth}" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+
+                        <!-- Nav rail (feature 08, B2): inset so it never protrudes
+                             over the neon border; selection driven by one command. -->
+                        <Grid x:Name="NavRail"
+                              Grid.Column="0"
+                              Margin="{StaticResource NavRailInset}"
+                              Background="{StaticResource CardSurfaceBrush}"
+                              BorderBrush="{StaticResource CardBorderBrush}"
+                              BorderThickness="0,0,1,0"
+                              DataContext="{x:Bind Navigation}">
+                            <StackPanel Spacing="8"
+                                        Padding="0,12,0,12"
+                                        HorizontalAlignment="Center">
+                                <Button Width="32"
+                                        Height="32"
+                                        Padding="0"
+                                        Background="Transparent"
+                                        BorderBrush="{StaticResource CardBorderBrush}"
+                                        BorderThickness="0"
+                                        Command="{Binding SelectCommand}"
+                                        CommandParameter="{x:Bind Navigation.ClockPage}"
+                                        ToolTipService.ToolTip="Clock">
+                                    <FontIcon Glyph="&#xE909;"
+                                              FontSize="14"
+                                              Foreground="{Binding SelectedPage, Converter={StaticResource EnumEquals}, ConverterParameter=Clock}" />
+                                </Button>
+                                <Button Width="32"
+                                        Height="32"
+                                        Padding="0"
+                                        Background="Transparent"
+                                        BorderBrush="{StaticResource CardBorderBrush}"
+                                        BorderThickness="0"
+                                        Command="{Binding SelectCommand}"
+                                        CommandParameter="{x:Bind Navigation.AlarmPage}"
+                                        ToolTipService.ToolTip="Alarms">
+                                    <FontIcon Glyph="&#xE916;"
+                                              FontSize="14"
+                                              Foreground="{Binding SelectedPage, Converter={StaticResource EnumEquals}, ConverterParameter=Alarm}" />
+                                </Button>
+                                <Button Width="32"
+                                        Height="32"
+                                        Padding="0"
+                                        Background="Transparent"
+                                        BorderBrush="{StaticResource CardBorderBrush}"
+                                        BorderThickness="0"
+                                        Command="{Binding SelectCommand}"
+                                        CommandParameter="{x:Bind Navigation.TimerPage}"
+                                        ToolTipService.ToolTip="Timer">
+                                    <FontIcon Glyph="&#xE917;"
+                                              FontSize="14"
+                                              Foreground="{Binding SelectedPage, Converter={StaticResource EnumEquals}, ConverterParameter=Timer}" />
+                                </Button>
+                                <Border Height="1"
+                                        Margin="8,4"
+                                        Background="{StaticResource FlipSplitBrush}" />
+                                <Ellipse Width="6"
+                                         Height="6"
+                                         Fill="{StaticResource NeonAccentBrush}" />
+                            </StackPanel>
+                        </Grid>
+
+                        <!-- Content region: one fixed cell hosts every view (zero-jump
+                             switching) plus the top-right window-controls overlay. -->
+                        <Grid Grid.Column="1"
+                              x:Name="ContentRegion"
+                              Padding="{StaticResource ContentViewPadding}">
+                            <StackPanel x:Name="ClockView"
+                                        Spacing="12"
+                                        Visibility="{Binding DataContext.SelectedPage, ElementName=NavRail, Converter={StaticResource EnumEquals}, ConverterParameter=Clock}">
+                                <ContentControl Style="{StaticResource ViewHeader}" Content="WORLD CLOCK" />
+                                <ItemsControl ItemsSource="{Binding Cards}">
+                                    <ItemsControl.ItemsPanel>
+                                        <ItemsPanelTemplate>
+                                            <ItemsWrapGrid Orientation="Horizontal"
+                                                           MaximumRowsOrColumns="6" />
+                                        </ItemsPanelTemplate>
+                                    </ItemsControl.ItemsPanel>
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate>
+                                            <controls:WorldClockCardControl Time="{Binding Time}"
+                                                                            ZoneLabel="{Binding Label}"
+                                                                            Offset="{Binding OffsetText}"
+                                                                            HasAlarm="{Binding HasAlarm}"
+                                                                            IsAlarmRinging="{Binding IsAlarmRinging}"
+                                                                            Margin="{StaticResource WorldClockCardGap}" />
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+                            </StackPanel>
+
+                            <views:AlarmView x:Name="AlarmPanel"
+                                             Visibility="{Binding DataContext.SelectedPage, ElementName=NavRail, Converter={StaticResource EnumEquals}, ConverterParameter=Alarm}" />
+
+                            <views:TimerView x:Name="TimerPanel"
+                                             Visibility="{Binding DataContext.SelectedPage, ElementName=NavRail, Converter={StaticResource EnumEquals}, ConverterParameter=Timer}" />
+
+                            <!-- Window controls (feature 08, B4): inside the content
+                                 region, inset from the upper-right neon border. -->
                             <StackPanel x:Name="CaptionButtons"
-                                        Grid.Column="2"
                                         Orientation="Horizontal"
-                                        VerticalAlignment="Center">
+                                        HorizontalAlignment="Right"
+                                        VerticalAlignment="Top">
                                 <Button x:Name="MinimizeButton"
                                         Width="30"
                                         Height="30"
@@ -194,89 +251,6 @@ VerticalAlignment="Center"
                                               Foreground="{StaticResource TextOnCardBrush}" />
                                 </Button>
                             </StackPanel>
-                        </Grid>
-                    </Grid>
-
-                    <!-- Body: side nav rail + tray -->
-                    <Grid Grid.Row="1">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="{StaticResource SidebarWidth}" />
-                            <ColumnDefinition Width="*" />
-                        </Grid.ColumnDefinitions>
-
-                        <Grid Grid.Column="0"
-                              Background="{StaticResource CardSurfaceBrush}"
-                              BorderBrush="{StaticResource CardBorderBrush}"
-                              BorderThickness="0,0,1,0">
-                            <StackPanel Spacing="8"
-                                        Padding="0,12,0,12"
-                                        HorizontalAlignment="Center">
-                                <Button Width="32"
-                                        Height="32"
-                                        Padding="0"
-                                        Background="Transparent"
-                                        BorderBrush="{StaticResource CardBorderBrush}"
-                                        BorderThickness="0"
-                                        IsEnabled="False"
-                                        ToolTipService.ToolTip="World Clock">
-                                    <FontIcon Glyph="&#xE909;"
-                                              FontSize="14"
-                                              Foreground="{StaticResource TextOnCardBrush}" />
-                                </Button>
-<Button x:Name="SidebarAlarmButton"
-                                        Width="32"
-                                        Height="32"
-                                        Padding="0"
-                                        Background="Transparent"
-                                        BorderBrush="{StaticResource CardBorderBrush}"
-                                        BorderThickness="0"
-                                        Click="OnSidebarAlarmClicked"
-                                        ToolTipService.ToolTip="Alarms">
-                                    <FontIcon Glyph="&#xE916;"
-                                              FontSize="14"
-                                              Foreground="{StaticResource TextOnCardBrush}" />
-                                </Button>
-<Button x:Name="SidebarTimerButton"
-                                        Width="32"
-                                        Height="32"
-                                        Padding="0"
-                                        Background="Transparent"
-                                        BorderBrush="{StaticResource CardBorderBrush}"
-                                        BorderThickness="0"
-                                        Click="OnSidebarTimerClicked"
-                                        ToolTipService.ToolTip="Timer">
-                                    <FontIcon Glyph="&#xE917;"
-                                              FontSize="14"
-                                              Foreground="{StaticResource TextOnCardBrush}" />
-                                </Button>
-                                <Border Height="1"
-                                        Margin="8,4"
-                                        Background="{StaticResource FlipSplitBrush}" />
-                                <Ellipse Width="6"
-                                         Height="6"
-                                         Fill="{StaticResource NeonAccentBrush}" />
-                            </StackPanel>
-                        </Grid>
-
-                        <Grid Grid.Column="1" Padding="8">
-                            <ItemsControl ItemsSource="{Binding Cards}">
-                                <ItemsControl.ItemsPanel>
-                                    <ItemsPanelTemplate>
-                                        <ItemsWrapGrid Orientation="Horizontal"
-                                                       MaximumRowsOrColumns="6" />
-                                    </ItemsPanelTemplate>
-</ItemsControl.ItemsPanel>
-                                <ItemsControl.ItemTemplate>
-                                    <DataTemplate>
-                                        <controls:WorldClockCardControl Time="{Binding Time}"
-                                                                        ZoneLabel="{Binding Label}"
-                                                                        Offset="{Binding OffsetText}"
-                                                                        HasAlarm="{Binding HasAlarm}"
-                                                                        IsAlarmRinging="{Binding IsAlarmRinging}"
-                                                                        Margin="{StaticResource WorldClockCardGap}" />
-                                    </DataTemplate>
-                                </ItemsControl.ItemTemplate>
-                            </ItemsControl>
                         </Grid>
                     </Grid>
                 </Grid>
